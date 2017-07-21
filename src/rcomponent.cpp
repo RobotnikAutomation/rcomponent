@@ -22,7 +22,6 @@
  */
 
 #include <rcomponent/rcomponent.h>
-
 #include <robotnik_msgs/State.h>
 
 /*! \fn RComponent::RComponent()
@@ -422,17 +421,3 @@ void RComponent::rosPublish(){
 	state_publisher.publish(msg);
 	
 }
-
-/*
-// MAIN
-int main(int argc, char** argv)
-{
-    ros::init(argc, argv, "rcomponent");
-	
-	ros::NodeHandle n;		
-  	RComponent controller(n);
-	
-	controller.start();
-
-	return (0);
-}*/
