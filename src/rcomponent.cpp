@@ -44,6 +44,9 @@ RComponent::RComponent(ros::NodeHandle h):nh_(h), pnh_("~"){
 	state = robotnik_msgs::State::INIT_STATE;
 	// Realizar para cada una de las clases derivadas
 	component_name.assign("RComponent");
+
+	threadData.pthreadPar.prio = 25;				// Priority level 0[min]-80[max]
+    threadData.pthreadPar.clock= CLOCK_REALTIME; // 0-CLOCK_MONOTONIC 1-CLOCK_REALTIME
 	
 }
 
@@ -110,19 +113,20 @@ int RComponent::shutdown(){
 
 
 /*! \fn int RComponent::start()
- * Starts the control thread of the component and its subcomponents
+ * Starts the control operation of the component and its subcomponents in a blocking way
  * \return OK
  * \return RUNNING if it's already running
  * \return NOT_INITIALIZED if the component is not initialized
 */
 int RComponent::start(){
-	// Performs ROS setup
-	rosSetup();
-	
 	if(running){
 		ROS_INFO("%s::start: the component's thread is already running", component_name.c_str());
 		return THREAD_RUNNING;
 	}
+	
+	// Performs ROS setup
+	rosSetup();
+	
 	
 	ROS_INFO("%s started", component_name.c_str());
 	
@@ -135,6 +139,38 @@ int RComponent::start(){
 
 }
 
+/*! \fn int RComponent::start()
+ * Starts the control thread of the component and its subcomponents
+ * \return OK
+ * \return RUNNING if it's already running
+ * \return NOT_INITIALIZED if the component is not initialized
+*/
+int RComponent::asyncStart(){
+	if(running){
+		ROS_INFO("%s::start: the component's thread is already running", component_name.c_str());
+		return THREAD_RUNNING;
+	}
+	
+	// Performs ROS setup
+	rosSetup();
+
+    pthread_attr_t attr;	// Thread attributed for the component threads spawned in this function
+    
+    ROS_DEBUG("%s::Start: launching the thread", component_name.c_str());
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if(pthread_create(&threadData.pthreadId, &attr, &RComponent::asyncControlLoop, this) != 0)	{
+        ROS_ERROR("%s::Start: Could not create ControlThread", component_name.c_str());
+        pthread_attr_destroy(&attr);
+        running = false;
+        return ERROR;
+    }
+	
+	running = true;
+	
+	return OK;
+
+}
 /*! \fn int RComponent::stop()
  * Stops the control thread of the Motors
  * \return OK
@@ -160,6 +196,12 @@ int RComponent::stop(){
 	usleep(100000);
 
 	return OK;
+}
+
+void * RComponent::asyncControlLoop(void *context)
+{
+    ((RComponent *)context)->controlLoop();
+    return NULL;
 }
 
 /*!	\fn void RComponent::controlLoop()

@@ -52,6 +52,25 @@ namespace rcomponent {
     };
 
 
+    //! Struct used for real time thread
+    struct thread_param{
+        int prio;			// Thread priority level 0[min]-80[max]
+        int clock;  		// CLOCK_MONOTONIC or CLOCK_REALTIME
+    };
+    
+    //! struct to store main data for a thread
+    typedef struct thread_data{
+        //! Priority and clock
+        struct thread_param pthreadPar;
+        //! Contains the desired frequency of the thread
+        double dDesiredHz;
+        //! Contains the real frequency of the thread
+        double dRealHz;
+        //! Contains the id of the control thread
+        pthread_t pthreadId;
+    }
+    thread_data;
+
     //! Class Rcomponent
     class RComponent{
         protected:
@@ -76,6 +95,9 @@ namespace rcomponent {
             //! Publish the component state
             ros::Publisher state_publisher;
 
+            //! Contains data for the main thread
+            thread_data threadData;
+
         public:
             //! Public constructor
             RComponent(ros::NodeHandle h);
@@ -88,6 +110,12 @@ namespace rcomponent {
             //! @return RUNNING if it's already running
             //! @return NOT_INITIALIZED if it's not initialized
             virtual int start();
+            //! Starts the control loop of the component and its subcomponents in a separated thread
+            //! @return OK
+            //! @return ERROR starting the thread
+            //! @return RUNNING if it's already running
+            //! @return NOT_INITIALIZED if it's not initialized
+            virtual int asyncStart();
             //! Stops the main control loop of the component and its subcomponents
             //! @return OK
             //! @return ERROR if any error has been produced
@@ -118,6 +146,8 @@ namespace rcomponent {
             //! All core component functionality is contained in this thread.
             //!	All of the RComponent component state machine code can be found here.
             virtual void controlLoop();
+            //! Static helper method that enables the execution of controlLoop inside a thread
+            static void * asyncControlLoop(void *);
             //! Actions performed on initial state
             virtual void initState();
             //! Actions performed on standby state
