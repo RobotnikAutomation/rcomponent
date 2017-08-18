@@ -23,7 +23,7 @@
 using namespace std;
 
 //! Test class that inherits RComponent
-class SimpleServiceComponent: public RComponent{
+class SimpleServiceComponent: public rcomponent::RComponent{
 	private:
 	//! Name of the topic
 	string service_server_name_;
@@ -44,7 +44,7 @@ class SimpleServiceComponent: public RComponent{
 	
 	// Inherits from RComponent
 	int rosSetup(){
-		if(RComponent::rosSetup() == OK){
+		if(RComponent::rosSetup() == rcomponent::OK){
 			pnh_.param<string>("service_server_name", service_server_name_, "service_server");
 			nh_.param<string>("service_client_name", service_client_name_, "sevice_client");
 			
@@ -55,7 +55,7 @@ class SimpleServiceComponent: public RComponent{
 	
 	// Inherits from RComponent
 	int rosShutdown(){
-		if(RComponent::rosShutdown() == OK){
+		if(RComponent::rosShutdown() == rcomponent::OK){
 			ROS_INFO("rosShutdown");
 			service_server_.shutdown();
 		}

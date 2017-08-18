@@ -29,6 +29,9 @@
  *	\param hz as double, sets the desired frequency of the controlthread
  *	\param h as ros::NodeHandle, ROS node handle
 */
+
+namespace rcomponent {
+
 RComponent::RComponent(ros::NodeHandle h):nh_(h), pnh_("~"){
 	// Set main flags to false
 	ros_initialized = initialized = running = false;
@@ -421,3 +424,4 @@ void RComponent::rosPublish(){
 	state_publisher.publish(msg);
 	
 }
+} //namespace rcomponent

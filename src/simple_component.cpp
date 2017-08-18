@@ -21,8 +21,9 @@
 
 using namespace std;
 
+
 //! Test class that inherits RComponent
-class SimpleComponent: public RComponent{
+class SimpleComponent: public rcomponent::RComponent{
 private:
 	//! Name of the topic to publish
 	string topic_name_;
@@ -46,7 +47,7 @@ private:
 	
 	// Inherits from RComponent
 	int rosSetup(){
-		if(RComponent::rosSetup() == OK){
+		if(RComponent::rosSetup() == rcomponent::OK){
 			pnh_.param<string>("topic_name", topic_name_, "status");
 			pnh_.param<string>("subs_topic_name", subs_topic_name_, "any");
 			
@@ -59,7 +60,7 @@ private:
 	}
 	// Inherits from RComponent
 	int rosShutdown(){
-		if(RComponent::rosShutdown() == OK){
+		if(RComponent::rosShutdown() == rcomponent::OK){
 			ROS_INFO("rosShutdown");		
 		}
 	}
