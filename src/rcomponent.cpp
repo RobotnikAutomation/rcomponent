@@ -125,8 +125,11 @@ int RComponent::start(){
 	}
 	
 	// Performs ROS setup
-	rosSetup();
-	
+
+	int setup_result = rosSetup();
+
+	if (setup_result == rcomponent::ERROR)
+		return rcomponent::ERROR;
 	
 	ROS_INFO("%s started", component_name.c_str());
 	
@@ -139,7 +142,7 @@ int RComponent::start(){
 
 }
 
-/*! \fn int RComponent::start()
+/*! \fn int RComponent::asyncStart()
  * Starts the control thread of the component and its subcomponents
  * \return OK
  * \return RUNNING if it's already running
@@ -152,7 +155,10 @@ int RComponent::asyncStart(){
 	}
 	
 	// Performs ROS setup
-	rosSetup();
+    int setup_result = rosSetup();
+
+	if (setup_result == rcomponent::ERROR)
+	    return rcomponent::ERROR;
 
     pthread_attr_t attr;	// Thread attributed for the component threads spawned in this function
     
