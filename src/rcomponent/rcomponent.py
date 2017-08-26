@@ -47,7 +47,7 @@ class RComponent:
 	
 	def __init__(self, args):
 		
-		self.node_name = rospy.get_name().replace('/','')
+		self.node_name = rospy.get_name() #.replace('/','')
 		self.desired_freq = args['desired_freq'] 
 		# Checks value of freq
 		if self.desired_freq <= 0.0 or self.desired_freq > MAX_FREQ:
