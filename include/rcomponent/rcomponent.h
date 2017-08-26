@@ -130,6 +130,8 @@ namespace rcomponent {
             //! Method to get current update rate of the thread
             //! @return pthread_hz
             double getUpdateRate();
+            //! Returns the name of the component
+            const char *getComponentName();
 
         protected:
             //! Configures and initializes the component

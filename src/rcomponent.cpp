@@ -340,6 +340,13 @@ char *RComponent::getStateString(){
 	return getStateString(state);
 }
 
+/*! \fn char *RComponent::getComponentName()
+ *  \brief Returns the name of the component
+*/
+const char *RComponent::getComponentName(){
+    return component_name.c_str();
+}
+
 /*!	\fn char *RComponent::getStateString(int state)
  *	\brief Gets the state as a string
 */
