@@ -41,6 +41,7 @@ add_executable(rscomponent_template src/rscomponent_template.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
+add_dependencies(rcomponent robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_server robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_simple robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_simple_async robotnik_msgs_generate_messages_cpp)
