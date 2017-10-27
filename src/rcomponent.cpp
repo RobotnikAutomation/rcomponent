@@ -55,6 +55,7 @@ RComponent::RComponent(ros::NodeHandle h) : nh_(h), pnh_("~")
 */
 RComponent::~RComponent()
 {
+  running = false;
 }
 
 /*! \fn int RComponent::setup()
