@@ -32,7 +32,16 @@
 
 namespace rcomponent
 {
-RComponent::RComponent(ros::NodeHandle h) : nh_(h), pnh_("~")
+RComponent::RComponent(ros::NodeHandle h) : RComponent::RComponent(h, ros::NodeHandle("~"))
+{
+  // XXX: this constructor is left to not break legacy code
+}
+
+RComponent::RComponent(ros::NodeHandle h, std::string name) : RComponent::RComponent(h, ros::NodeHandle(h, name))
+{
+}
+
+RComponent::RComponent(ros::NodeHandle h, ros::NodeHandle ph) : nh_(h), pnh_(ph)
 {
   // Set main flags to false
   ros_initialized = initialized = running = false;

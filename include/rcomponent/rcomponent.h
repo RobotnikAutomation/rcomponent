@@ -104,6 +104,10 @@ protected:
 public:
   //! Public constructor
   RComponent(ros::NodeHandle h);
+  //! Public constructor, assigning a private namespace
+  RComponent(ros::NodeHandle h, std::string name);
+  //! Public constructor, assigning a private nodehandle
+  RComponent(ros::NodeHandle h, ros::NodeHandle ph);
   //! Public destructor
   virtual ~RComponent();
 
