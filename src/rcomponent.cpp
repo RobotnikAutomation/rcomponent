@@ -219,6 +219,16 @@ int RComponent::stop()
   return OK;
 }
 
+/*! \fn int RComponent::isRunning()
+ *  Checks if component is running
+ *  \return TRUE component is running
+ *  \return FALSE component is not running
+*/
+bool RComponent::isRunning()
+{
+  return running;
+}
+
 void* RComponent::asyncControlLoop(void* context)
 {
   ((RComponent*)context)->controlLoop();
@@ -515,4 +525,5 @@ void RComponent::rosPublish()
 
   state_publisher.publish(msg);
 }
+
 }  // namespace rcomponent

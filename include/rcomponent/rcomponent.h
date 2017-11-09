@@ -128,6 +128,11 @@ public:
   //! @return ERROR if any error has been produced
   //! @return NOT_RUNNING if the main thread isn't running
   virtual int stop();
+  //! Checks if component is running
+  //! @return TRUE component is running
+  //! @return FALSE component is not running
+  bool isRunning();
+
   //! Returns the general state of the RComponent
   int getState();
   //! Returns the general state of the RComponent as string
