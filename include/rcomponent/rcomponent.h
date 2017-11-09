@@ -139,6 +139,10 @@ public:
   double getUpdateRate();
   //! Returns the name of the component
   const char* getComponentName();
+  //! Returns the public namespace of the component
+  const std::string getPublicNamespace();
+  //! Returns the private namespace of the component
+  const std::string getPrivateNamespace();
 
 protected:
   //! Configures and initializes the component

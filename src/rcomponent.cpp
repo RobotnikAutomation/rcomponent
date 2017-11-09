@@ -374,6 +374,22 @@ const char* RComponent::getComponentName()
   return component_name.c_str();
 }
 
+/*! \fn std::string RComponent::getPrivateNamespace()
+ *  \brief Returns the public namespace of the component
+*/
+const std::string RComponent::getPrivateNamespace()
+{
+  return pnh_.getNamespace();
+}
+
+/*! \fn std::string RComponent::getPublicNamespace()
+ *  \brief Returns the public namespace of the component
+*/
+const std::string RComponent::getPublicNamespace()
+{
+  return nh_.getNamespace();
+}
+
 /*!	\fn char *RComponent::getStateString(int state)
  *	\brief Gets the state as a string
 */
