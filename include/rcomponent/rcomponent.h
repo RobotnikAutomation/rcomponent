@@ -135,9 +135,11 @@ public:
 
   //! Returns the general state of the RComponent
   int getState();
-  //! Returns the general state of the RComponent as string
-  char* getStateString();
-  //! Returns the general state as string
+  //! Returns the general state of the RComponent as char* string
+  // char* getStateString();
+  //! Returns the general state of the RComponent as std::string
+  std::string getStateString();
+  //! Returns the general state as char* string
   char* getStateString(int state);
   //! Method to get current update rate of the thread
   //! @return pthread_hz

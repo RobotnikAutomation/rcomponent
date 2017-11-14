@@ -369,11 +369,19 @@ int RComponent::getState()
 }
 
 /*!	\fn char *RComponent::getStateString()
- *	\brief Gets the state of the component as string
+ *	\brief Gets the state of the component as char* string
 */
-char* RComponent::getStateString()
+// char* RComponent::getStateString()
+//{
+//  return getStateString(state);
+//}
+
+/*!	\fn std::string RComponent::getStateString()
+ *	\brief Gets the state of the component as std::string
+*/
+std::string RComponent::getStateString()
 {
-  return getStateString(state);
+  return std::string(getStateString(state));
 }
 
 /*! \fn char *RComponent::getComponentName()
