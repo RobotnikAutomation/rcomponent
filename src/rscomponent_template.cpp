@@ -34,6 +34,8 @@
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 #include "diagnostic_updater/publisher.h"
 
+#include <rcomponent/rcomponent_log_macros.h>
+
 #define RSCOMPONENT_MIN_COMMAND_REC_FREQ 1.0
 #define RSCOMPONENT_MAX_COMMAND_REC_FREQ 10.0
 #define RSCOMPONENT_DEFAULT_FREQ 20.0
@@ -51,6 +53,7 @@ public:
   ros::Time last_command_time_;  // Last moment when the component received a command
   ros::Time last_read_time_;     // Last moment when the positions were read
   diagnostic_updater::FunctionDiagnosticTask command_freq_;
+  std::string component_name;
 
   //! Node running
   bool running;
@@ -82,6 +85,7 @@ public:
     , desired_freq_(RSCOMPONENT_DEFAULT_FREQ)
     , freq_diag_(diagnostic_updater::FrequencyStatusParam(&desired_freq_, &desired_freq_, 0.05))
     , command_freq_("Command frequency check", boost::bind(&RSComponent::checkCommandSubscriber, this, _1))
+    , component_name("Component")
   {
     running = false;
     ros::NodeHandle RSComponent(node_handle_, "RSComponent");
@@ -118,7 +122,7 @@ public:
     // Topics freq control for command topics
     double min_freq = RSCOMPONENT_MIN_COMMAND_REC_FREQ;  // If you update these values, the
     double max_freq = RSCOMPONENT_MAX_COMMAND_REC_FREQ;  // HeaderlessTopicDiagnostic will use the new values.
-    ROS_INFO("Desired freq %5.2f", desired_freq_);
+    RCOMPONENT_INFO("Desired freq %5.2f", desired_freq_);
     // Sets the topic frequency we want to monitorize
     subs_command_freq = new diagnostic_updater::HeaderlessTopicDiagnostic(
         "/joint_commands", diagnostic_, diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
@@ -244,7 +248,7 @@ public:
           r.sleep();
         }
 
-        ROS_INFO("RSComponent::spin - END OF ros::ok() !!!");
+        RCOMPONENT_INFO("END OF ros::ok() !!!");
       }
       else
       {

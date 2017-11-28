@@ -93,7 +93,7 @@ protected:
   {
     if (RComponent::rosShutdown() == rcomponent::OK)
     {
-      ROS_INFO("rosShutdown");
+      RCOMPONENT_INFO("");
       service_server_.shutdown();
     }
   }
@@ -101,7 +101,7 @@ protected:
   // Callback handler for the service server
   bool serviceServerCb(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
   {
-    ROS_INFO("serviceServerCb: Received server");
+    RCOMPONENT_INFO("Received server");
 
     return true;
   }

@@ -62,7 +62,7 @@ private:
   {
     if (RComponent::rosShutdown() == rcomponent::OK)
     {
-      ROS_INFO("rosShutdown");
+      RCOMPONENT_INFO("");
     }
   }
 
@@ -78,7 +78,7 @@ private:
   // Callback handler associated with the subscriber
   void callback(const std_msgs::StringConstPtr& message)
   {
-    ROS_INFO("callback: Received msg: %s", message->data.c_str());
+    RCOMPONENT_INFO("Received msg: %s", message->data.c_str());
   }
 };
 

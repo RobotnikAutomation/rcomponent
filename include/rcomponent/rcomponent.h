@@ -103,6 +103,8 @@ protected:
 
 public:
   //! Public constructor
+  RComponent();
+  //! Public constructor
   RComponent(ros::NodeHandle h);
   //! Public constructor, assigning a private namespace
   RComponent(ros::NodeHandle h, std::string name);

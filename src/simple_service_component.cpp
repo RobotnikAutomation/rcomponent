@@ -58,7 +58,7 @@ protected:
   {
     if (RComponent::rosShutdown() == rcomponent::OK)
     {
-      ROS_INFO("rosShutdown");
+      RCOMPONENT_INFO("rosShutdown");
       service_server_.shutdown();
     }
   }
@@ -66,15 +66,15 @@ protected:
   // Callback handler for the service server
   bool serviceServerCb(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
   {
-    ROS_INFO("serviceServerCb: Received server");
+    RCOMPONENT_INFO("Received server");
     std_srvs::Empty service;
     if (service_client_.call(service))
     {
-      ROS_INFO("serviceServerCb: calling service");
+      RCOMPONENT_INFO("calling service");
     }
     else
     {
-      ROS_ERROR("serviceServerCb: Error connecting service %s", service_client_name_.c_str());
+      RCOMPONENT_ERROR("Error connecting service %s", service_client_name_.c_str());
     }
 
     return true;

@@ -78,7 +78,7 @@ int RComponent::setup()
   // Checks if has been initialized
   if (initialized)
   {
-    ROS_INFO("%s::Setup: Already initialized", component_name.c_str());
+    RCOMPONENT_INFO("Already initialized");
 
     return INITIALIZED;
   }
@@ -104,12 +104,12 @@ int RComponent::shutdown()
 {
   if (running)
   {
-    ROS_INFO("%s::Shutdown: Impossible while thread running, first must be stopped", component_name.c_str());
+    RCOMPONENT_INFO("Impossible while thread running, first must be stopped");
     return THREAD_RUNNING;
   }
   if (!initialized)
   {
-    ROS_INFO("%s::Shutdown: Impossible because of it's not initialized", component_name.c_str());
+    RCOMPONENT_INFO("Impossible because of it's not initialized");
     return NOT_INITIALIZED;
   }
 
@@ -133,7 +133,7 @@ int RComponent::start()
 {
   if (running)
   {
-    ROS_INFO("%s::start: the component's thread is already running", component_name.c_str());
+    RCOMPONENT_INFO("Component's thread is already running");
     return THREAD_RUNNING;
   }
 
@@ -144,7 +144,7 @@ int RComponent::start()
   if (setup_result == rcomponent::ERROR)
     return rcomponent::ERROR;
 
-  ROS_INFO("%s started", component_name.c_str());
+  RCOMPONENT_INFO("Started");
 
   running = true;
 
@@ -164,7 +164,7 @@ int RComponent::asyncStart()
 {
   if (running)
   {
-    ROS_INFO("%s::start: the component's thread is already running", component_name.c_str());
+    RCOMPONENT_INFO("Component's thread is already running");
     return THREAD_RUNNING;
   }
 
@@ -176,12 +176,12 @@ int RComponent::asyncStart()
 
   pthread_attr_t attr;  // Thread attributed for the component threads spawned in this function
 
-  ROS_DEBUG("%s::Start: launching the thread", component_name.c_str());
+  RCOMPONENT_DEBUG("Launching the thread");
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   if (pthread_create(&threadData.pthreadId, &attr, &RComponent::asyncControlLoop, this) != 0)
   {
-    ROS_ERROR("%s::Start: Could not create ControlThread", component_name.c_str());
+    RCOMPONENT_ERROR("Could not create ControlThread");
     pthread_attr_destroy(&attr);
     running = false;
     return ERROR;
@@ -201,7 +201,7 @@ int RComponent::stop()
 {
   if (!running)
   {
-    ROS_INFO("%s::stop: Thread not running", component_name.c_str());
+    RCOMPONENT_INFO("Thread not running");
 
     return THREAD_NOT_RUNNING;
   }
@@ -210,7 +210,7 @@ int RComponent::stop()
   // Stops another subcomponents, if it's necessary //
   ///////////////////////////////////////////////////
   //
-  ROS_INFO("%s::Stop: Stopping the component", component_name.c_str());
+  RCOMPONENT_INFO("Stopping the component");
 
   running = false;
 
@@ -240,7 +240,7 @@ void* RComponent::asyncControlLoop(void* context)
 */
 void RComponent::controlLoop()
 {
-  ROS_INFO("%s::controlLoop(): Init", component_name.c_str());
+  RCOMPONENT_INFO("Init");
   ros::Rate r(desired_freq_);
   ros::Time t1, t2;
   while (running && ros::ok())
@@ -288,7 +288,7 @@ void RComponent::controlLoop()
   // Performs ROS Shutdown
   rosShutdown();
 
-  ROS_INFO("%s::controlLoop(): End", component_name.c_str());
+  RCOMPONENT_INFO("End");
 }
 
 /*!	\fn void RComponent::initState()
@@ -450,7 +450,7 @@ void RComponent::switchToState(int new_state)
 
   // saves the previous state
   previous_state = state;
-  ROS_INFO("%s::SwitchToState: %s -> %s", component_name.c_str(), getStateString(state), getStateString(new_state));
+  RCOMPONENT_INFO("%s -> %s", getStateString(state), getStateString(new_state));
   state = new_state;
 }
 
@@ -462,7 +462,7 @@ int RComponent::rosSetup()
   // Checks if has been initialized
   if (ros_initialized)
   {
-    ROS_INFO("%s::rosSetup: Already initialized", component_name.c_str());
+    RCOMPONENT_INFO("Already initialized");
 
     return INITIALIZED;
   }
@@ -504,12 +504,12 @@ int RComponent::rosShutdown()
 {
   if (running)
   {
-    ROS_INFO("%s::rosShutdown: Impossible while thread running, first must be stopped", component_name.c_str());
+    RCOMPONENT_INFO("Impossible while thread running, first must be stopped");
     return THREAD_RUNNING;
   }
   if (!ros_initialized)
   {
-    ROS_INFO("%s::rosShutdown: Impossible because of it's not initialized", component_name.c_str());
+    RCOMPONENT_INFO("Impossible because of it's not initialized");
     return NOT_INITIALIZED;
   }
 

@@ -35,6 +35,7 @@
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 #include "diagnostic_updater/publisher.h"
 
+#include <rcomponent/rcomponent_log_macros.h>
 //! Size of string for logging
 #define DEFAULT_THREAD_DESIRED_HZ 40.0
 
@@ -199,7 +200,7 @@ int RComponent::setup()
   // Checks if has been initialized
   if (initialized)
   {
-    ROS_INFO("%s::Setup: Already initialized", component_name.c_str());
+    RCOMPONENT_INFO("Already initialized");
 
     return INITIALIZED;
   }
@@ -225,12 +226,12 @@ int RComponent::shutdown()
 {
   if (running)
   {
-    ROS_INFO("%s::Shutdown: Impossible while thread running, first must be stopped", component_name.c_str());
+    RCOMPONENT_INFO("Impossible while thread running, first must be stopped");
     return THREAD_RUNNING;
   }
   if (!initialized)
   {
-    ROS_INFO("%s::Shutdown: Impossible because of it's not initialized", component_name.c_str());
+    RCOMPONENT_INFO("Impossible because of it's not initialized");
     return NOT_INITIALIZED;
   }
 
@@ -257,11 +258,11 @@ int RComponent::start()
 
   if (running)
   {
-    ROS_INFO("%s::start: the component's thread is already running", component_name.c_str());
+    RCOMPONENT_INFO("the component's thread is already running");
     return THREAD_RUNNING;
   }
 
-  ROS_INFO("%s started", component_name.c_str());
+  RCOMPONENT_INFO("Started");
 
   running = true;
 
@@ -281,7 +282,7 @@ int RComponent::stop()
 {
   if (!running)
   {
-    ROS_INFO("%s::stop: Thread not running", component_name.c_str());
+    RCOMPONENT_INFO("Thread not running");
 
     return THREAD_NOT_RUNNING;
   }
@@ -290,7 +291,7 @@ int RComponent::stop()
   // Stops another subcomponents, if it's necessary //
   ///////////////////////////////////////////////////
   //
-  ROS_INFO("%s::Stop: Stopping the component", component_name.c_str());
+  RCOMPONENT_INFO("Stopping the component");
 
   running = false;
 
@@ -304,7 +305,7 @@ int RComponent::stop()
 */
 void RComponent::controlLoop()
 {
-  ROS_INFO("%s::controlLoop(): Init", component_name.c_str());
+  RCOMPONENT_INFO("Init");
   ros::Rate r(desired_freq_);
   ros::Time t1, t2;
   while (running && ros::ok())
@@ -352,7 +353,7 @@ void RComponent::controlLoop()
   // Performs ROS Shutdown
   rosShutdown();
 
-  ROS_INFO("%s::controlLoop(): End", component_name.c_str());
+  RCOMPONENT_INFO("End");
 }
 
 /*!	\fn void RComponent::initState()
@@ -484,7 +485,7 @@ void RComponent::switchToState(int new_state)
 
   // saves the previous state
   previous_state = state;
-  ROS_INFO("%s::SwitchToState: %s -> %s", component_name.c_str(), getStateString(state), getStateString(new_state));
+  RCOMPONENT_INFO("%s -> %s", getStateString(state), getStateString(new_state));
   state = new_state;
 }
 
@@ -496,7 +497,7 @@ int RComponent::rosSetup()
   // Checks if has been initialized
   if (ros_initialized)
   {
-    ROS_INFO("%s::rosSetup: Already initialized", component_name.c_str());
+    RCOMPONENT_INFO("Already initialized");
 
     return INITIALIZED;
   }
@@ -550,12 +551,12 @@ int RComponent::rosShutdown()
 {
   if (running)
   {
-    ROS_INFO("%s::rosShutdown: Impossible while thread running, first must be stopped", component_name.c_str());
+    RCOMPONENT_INFO("Impossible while thread running, first must be stopped");
     return THREAD_RUNNING;
   }
   if (!ros_initialized)
   {
-    ROS_INFO("%s::rosShutdown: Impossible because of it's not initialized", component_name.c_str());
+    RCOMPONENT_INFO("Impossible because of it's not initialized");
     return NOT_INITIALIZED;
   }
 
@@ -599,20 +600,20 @@ void RComponent::diagnosticUpdate(diagnostic_updater::DiagnosticStatusWrapper& s
 // EXAMPLE: Callback handler associated with the subscriber
 /*void RComponent::topicCallback(const std_msgs::StringConstPtr& message)
 {
-  ROS_INFO("callback: Received msg: %s", message->data.c_str());
+  RCOMPONENT_INFO("callback: Received msg: %s", message->data.c_str());
 }*/
 
 // Callback handler for the service server
 /*bool RComponent::serviceServerCb(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
 {
-  ROS_INFO("serviceServerCb: Received server");
+  RCOMPONENT_INFO("serviceServerCb: Received server");
   // Calls the client service
   std_srvs::Empty service;
 
   if(service_client_.call(service)){
-    ROS_INFO("serviceServerCb: calling service");
+    RCOMPONENT_INFO("serviceServerCb: calling service");
   }else{
-    ROS_ERROR("serviceServerCb: Error connecting service %s", service_client_name_.c_str());
+    RCOMPONENT_ERROR("serviceServerCb: Error connecting service %s", service_client_name_.c_str());
   }
 
   return true;
