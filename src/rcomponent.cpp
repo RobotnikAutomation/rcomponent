@@ -32,6 +32,10 @@
 
 namespace rcomponent
 {
+RComponent::RComponent()
+{
+}
+
 RComponent::RComponent(ros::NodeHandle h) : RComponent::RComponent(h, ros::NodeHandle("~"))
 {
   // XXX: this constructor is left to not break legacy code

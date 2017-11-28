@@ -33,6 +33,7 @@
 #include <string.h>
 #include <robotnik_msgs/State.h>
 
+#include <rcomponent/rcomponent_log_macros.h>
 //! Size of string for logging
 #define DEFAULT_THREAD_DESIRED_HZ 40.0
 
