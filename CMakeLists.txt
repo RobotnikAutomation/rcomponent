@@ -30,6 +30,8 @@ include_directories(
 
 ## Declare a cpp library
 add_library(rcomponent
+   include/rcomponent/rcomponent.h
+   include/rcomponent/rcomponent_log_macros.h
    src/rcomponent.cpp
 )
 
