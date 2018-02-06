@@ -94,4 +94,19 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 
 
+#############
+## Testing ##
+#############
 
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    find_package(rosunit REQUIRED)
+
+##    catkin_add_gtest(rosunit_rcomponent test/rosunit_rcomponent.cpp)
+##    target_link_libraries(rosunit_rcomponent ${catkin_LIBRARIES} rcomponent)
+    add_rostest_gtest(rosunit_rcomponent_log test/rosunit_rcomponent_log.test test/rosunit_rcomponent_log.cpp)
+    target_link_libraries(rosunit_rcomponent_log ${catkin_LIBRARIES} procedures)
+
+    add_executable(test_namespace test/test_namespace.cpp)
+    target_link_libraries(test_namespace ${catkin_LIBRARIES} rcomponent)
+endif()
