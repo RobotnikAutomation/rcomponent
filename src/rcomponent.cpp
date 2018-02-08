@@ -295,62 +295,70 @@ void RComponent::controlLoop()
   RCOMPONENT_INFO("End");
 }
 
-/*!	\fn void RComponent::initState()
+/*!	\fn int RComponent::initState()
  *	\brief Actions performed on initial
  * 	Setups the component
 */
-void RComponent::initState()
+int RComponent::initState()
 {
   // If component setup is successful goes to STANDBY (or READY) state
-  if (setup() != ERROR)
+  if (setup() == ERROR)
   {
-    switchToState(robotnik_msgs::State::STANDBY_STATE);
+    return ERROR;
   }
+  switchToState(robotnik_msgs::State::STANDBY_STATE);
+  return OK;
 }
 
-/*!	\fn void RComponent::shutdownState()
+/*!	\fn int RComponent::shutdownState()
  *	\brief Actions performed on Shutdown state
 */
-void RComponent::shutdownState()
+int RComponent::shutdownState()
 {
   if (shutdown() == OK)
   {
     switchToState(robotnik_msgs::State::INIT_STATE);
+    return OK;
   }
+  return ERROR;
 }
 
-/*!	\fn void RComponent::standbyState()
+/*!	\fn int RComponent::standbyState()
  *	\brief Actions performed on Standby state
 */
-void RComponent::standbyState()
+int RComponent::standbyState()
 {
+  return OK;
 }
 
-/*!	\fn void RComponent::readyState()
+/*!	\fn int RComponent::readyState()
  *	\brief Actions performed on ready state
 */
-void RComponent::readyState()
+int RComponent::readyState()
 {
+  return OK;
 }
 
-/*!	\fn void RComponent::EmergencyState()
+/*!	\fn int RComponent::EmergencyState()
  *	\brief Actions performed on emergency state
 */
-void RComponent::emergencyState()
+int RComponent::emergencyState()
 {
+  return OK;
 }
 
-/*!	\fn void RComponent::FailureState()
+/*!	\fn int RComponent::FailureState()
  *	\brief Actions performed on failure state
 */
-void RComponent::failureState()
+int RComponent::failureState()
 {
+  return OK;
 }
 
-/*!	\fn void RComponent::AllState()
+/*!	\fn int RComponent::AllState()
  *	\brief Actions performed on all states
 */
-void RComponent::allState()
+int RComponent::allState()
 {
   rosPublish();
 }

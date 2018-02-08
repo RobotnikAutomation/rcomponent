@@ -249,7 +249,7 @@ class RComponent:
 			self.switchToState(State.STANDBY_STATE)
 		
 		
-		return
+		return 0
 	
 	
 	def standbyState(self):
@@ -258,7 +258,7 @@ class RComponent:
 		'''
 		self.switchToState(State.READY_STATE)
 		
-		return
+		return 0
 	
 	
 	def readyState(self):
@@ -267,7 +267,7 @@ class RComponent:
 		'''
 		
 		
-		return
+		return 0
 		
 	
 	def shutdownState(self):
@@ -277,7 +277,7 @@ class RComponent:
 		if self.shutdown() == 0:
 			self.switchToState(State.INIT_STATE)
 		
-		return
+		return 0
 	
 	
 	def emergencyState(self):
@@ -285,7 +285,7 @@ class RComponent:
 			Actions performed in emergency state
 		'''
 		
-		return
+		return 0
 	
 	
 	def failureState(self):
@@ -294,7 +294,7 @@ class RComponent:
 		'''
 		
 			
-		return
+		return 0
 	
 	
 	def switchToState(self, new_state):

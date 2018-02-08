@@ -172,19 +172,19 @@ protected:
   //! Static helper method that enables the execution of controlLoop inside a thread
   static void* asyncControlLoop(void*);
   //! Actions performed on initial state
-  virtual void initState();
+  virtual int initState();
   //! Actions performed on standby state
-  virtual void standbyState();
+  virtual int standbyState();
   //! Actions performed on ready state
-  virtual void readyState();
+  virtual int readyState();
   //! Actions performed on the emergency state
-  virtual void emergencyState();
+  virtual int emergencyState();
   //! Actions performed on Failure state
-  virtual void failureState();
+  virtual int failureState();
   //! Actions performed on Shudown state
-  virtual void shutdownState();
+  virtual int shutdownState();
   //! Actions performed in all states
-  virtual void allState();
+  virtual int allState();
   //! Switches between states
   virtual void switchToState(int new_state);
   //! Setups all the ROS' stuff

@@ -115,12 +115,14 @@ protected:
     stat.add("State", getStateString());
   }
 
-  void allState()
+  int allState()
   {
     freq_diag_->tick();
     // subs_command_freq->tick();
     diagnostic_->update();
     rosPublish();
+
+    return rcomponent::OK;
   }
 
   void checkTopicSubscriber(diagnostic_updater::DiagnosticStatusWrapper& stat)
