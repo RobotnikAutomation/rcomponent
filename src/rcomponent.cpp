@@ -34,6 +34,7 @@ namespace rcomponent
 {
 RComponent::RComponent()
 {
+  constructed = false;
 }
 
 RComponent::RComponent(ros::NodeHandle h) : RComponent::RComponent(h, ros::NodeHandle("~"))
@@ -47,8 +48,40 @@ RComponent::RComponent(ros::NodeHandle h, std::string name) : RComponent::RCompo
 
 RComponent::RComponent(ros::NodeHandle h, ros::NodeHandle ph) : nh_(h), pnh_(ph)
 {
+  init(nh_, pnh_);
+}
+
+int RComponent::init(ros::NodeHandle h)
+{
+  return init(h, ros::NodeHandle("~"));
+}
+
+int RComponent::init(ros::NodeHandle h, std::string name)
+{
+  return init(h, ros::NodeHandle(h, name));
+}
+
+int RComponent::init(ros::NodeHandle h, ros::NodeHandle ph)
+{
+  // if (ros_initialized or initialized or running)
+  // {
+  //   RCOMPONENT_INFO("Already initialized");
+
+  //   return INITIALIZED;
+  // }
+  // desired_freq_ = 0;
+
+  nh_ = h;
+  pnh_ = ph;
+
+  // Realizar para cada una de las clases derivadas
+
+  // name assignment
+  component_name.assign(constructComponentNameFromHandles());
+
   // Set main flags to false
   ros_initialized = initialized = running = false;
+
   // reads params from server
   rosReadParams();
 
@@ -56,11 +89,12 @@ RComponent::RComponent(ros::NodeHandle h, ros::NodeHandle ph) : nh_(h), pnh_(ph)
     desired_freq_ = DEFAULT_THREAD_DESIRED_HZ;
 
   state = robotnik_msgs::State::INIT_STATE;
-  // Realizar para cada una de las clases derivadas
-  component_name.assign("RComponent");
 
   threadData.pthreadPar.prio = 25;               // Priority level 0[min]-80[max]
   threadData.pthreadPar.clock = CLOCK_REALTIME;  // 0-CLOCK_MONOTONIC 1-CLOCK_REALTIME
+  constructed = true;
+
+  return OK;
 }
 
 /*! \fn RComponent::~RComponent()
@@ -69,6 +103,7 @@ RComponent::RComponent(ros::NodeHandle h, ros::NodeHandle ph) : nh_(h), pnh_(ph)
 RComponent::~RComponent()
 {
   running = false;
+  constructed = false;
 }
 
 /*! \fn int RComponent::setup()
@@ -79,6 +114,14 @@ RComponent::~RComponent()
 */
 int RComponent::setup()
 {
+  // Checks if has been created with a fully qualified constructor, or with an empty
+  // constructor but then init has been called
+  if (constructed == false)
+  {
+    RCOMPONENT_ERROR("Not properly constructed");
+    return ERROR;
+  }
+
   // Checks if has been initialized
   if (initialized)
   {
@@ -396,8 +439,40 @@ const char* RComponent::getComponentName()
   return component_name.c_str();
 }
 
+/*! \fn char *RComponent::setComponentName()
+ *  \brief Returns the name of the component
+*/
+void RComponent::setComponentName(const std::string& name)
+{
+  component_name.assign(name);
+}
+
+/*! \fn std::string RComponent::constructComponentNameFromHandles()
+ *  \brief Constructs a proper name for the component, using information from the handles
+ *  passed to it
+*/
+std::string RComponent::constructComponentNameFromHandles()
+{
+  std::string name = "RComponent";
+  if (pnh_.getNamespace() != "" and pnh_.getNamespace() != "~")
+  {
+    name = pnh_.getNamespace();
+  }
+  else if (nh_.getNamespace() != "" and nh_.getNamespace() != "~")
+  {
+    name = nh_.getNamespace();
+  }
+
+  size_t i = name.rfind('/', name.length());
+  if (i != std::string::npos)
+  {
+    name = name.substr(i + 1, name.length() - i);
+  }
+  return name;
+}
+
 /*! \fn std::string RComponent::getPrivateNamespace()
- *  \brief Returns the public namespace of the component
+ *  \brief Sets the public namespace of the component
 */
 const std::string RComponent::getPrivateNamespace()
 {

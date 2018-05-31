@@ -78,6 +78,9 @@ typedef struct thread_data
 class RComponent
 {
 protected:
+  //! Controls if it has been properly constructed, either by calling
+  //! one of the fully qualified constructors, or one of the init funcionts
+  bool constructed;
   //! Controls if has been initialized succesfully
   bool initialized, ros_initialized;
   //! Controls the execution of the RComponent's thread
@@ -113,6 +116,12 @@ public:
   RComponent(ros::NodeHandle h, ros::NodeHandle ph);
   //! Public destructor
   virtual ~RComponent();
+  //! Acts as a delegate constructor
+  virtual int init(ros::NodeHandle h);
+  //! Acts as a delegate constructor, assigning a private namespace
+  virtual int init(ros::NodeHandle h, std::string name);
+  //! Acts as a delegate constructor, assigning a private nodehandle
+  virtual int init(ros::NodeHandle h, ros::NodeHandle ph);
 
   //! Starts the control loop of the component and its subcomponents
   //! @return OK
@@ -149,6 +158,8 @@ public:
   double getUpdateRate();
   //! Returns the name of the component
   const char* getComponentName();
+  //! Sets the name of the component
+  void setComponentName(const std::string& name);
   //! Returns the public namespace of the component
   const std::string getPublicNamespace();
   //! Returns the private namespace of the component
@@ -195,6 +206,8 @@ protected:
   virtual void rosPublish();
   //! Reads params from params server
   virtual void rosReadParams();
+  //! Constructs a name of the component from handles used
+  std::string constructComponentNameFromHandles();
 };
 }  // namespace rcomponent
 
