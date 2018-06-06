@@ -34,6 +34,8 @@
 #include <robotnik_msgs/State.h>
 
 #include <rcomponent/rcomponent_log_macros.h>
+#include <sstream>
+
 //! Size of string for logging
 #define DEFAULT_THREAD_DESIRED_HZ 40.0
 
@@ -208,6 +210,74 @@ protected:
   virtual void rosReadParams();
   //! Constructs a name of the component from handles used
   std::string constructComponentNameFromHandles();
+
+  //! Reads a parameter from the param server, and shows a message if parameter is not set
+  template <typename T>
+  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, const T& default_value,
+                 bool required = false)
+  {
+    // parameter is read from node handle passed
+    // required defines logger lever: if true, will show an error. if false, a warning
+    // TODO: improve: return true or false depending on parameter existence and required
+    // TODO: maybe would be better to define a log level instead of required
+    if (h.hasParam(name) == false)
+    {
+      if (required == false)
+      {
+        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name) << "\", using default value: " << default_value
+                                                 << ".");
+      }
+      else
+      {
+        RCOMPONENT_ERROR_STREAM("No parameter \"" << h.resolveName(name) << "\", using default value: " << default_value
+                                                  << ".");
+      }
+      value = default_value;
+      return false;
+    }
+    h.param<T>(name, value, default_value);
+    return true;
+  }
+
+  template <typename T>
+  bool readParam(const ros::NodeHandle& h, const std::string& name, std::vector<T>& value,
+                 const std::vector<T>& default_value, bool required = false)
+  {
+    // parameter is read from node handle passed
+    // required defines logger lever: if true, will show an error. if false, a warning
+    // TODO: improve: return true or false depending on parameter existence and required
+    // TODO: maybe would be better to define a log level instead of required
+    if (h.hasParam(name) == false)
+    {
+      std::stringstream default_value_message;
+      default_value_message << "[";
+      for (auto& v : default_value)
+        default_value_message << v << ",";
+      default_value_message << "]";
+
+      if (required == false)
+      {
+        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name)
+                                                 << "\", using default value: " << default_value_message.str() << ".");
+      }
+      else
+      {
+        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name)
+                                                 << "\", using default value: " << default_value_message.str() << ".");
+      }
+      value = default_value;
+      return false;
+    }
+    h.param<std::vector<T>>(name, value, default_value);
+    return true;
+  }
+  // this version, where default value is grabbed from the value of the variable, causes an ambiguous template
+  // substution when paramter type is bool
+  //  template <typename T>
+  //  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, bool required = false)
+  //  {
+  //    return readParam(h, name, value, value, required);
+  //  }
 };
 }  // namespace rcomponent
 
