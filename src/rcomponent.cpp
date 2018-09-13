@@ -327,8 +327,11 @@ void RComponent::controlLoop()
     r.sleep();
 
     t2 = ros::Time::now();
-
-    real_freq = 1.0 / (t2 - t1).toSec();
+    try{
+      real_freq = 1.0 / (t2 - t1).toSec();
+    }catch(std::runtime_error& ex) {
+        RCOMPONENT_ERROR("Exception: [%s]", ex.what());
+    }
   }
 
   shutdownState();
