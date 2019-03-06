@@ -327,10 +327,13 @@ void RComponent::controlLoop()
     r.sleep();
 
     t2 = ros::Time::now();
-    try{
+    try
+    {
       real_freq = 1.0 / (t2 - t1).toSec();
-    }catch(std::runtime_error& ex) {
-        RCOMPONENT_ERROR("Exception: [%s]", ex.what());
+    }
+    catch (std::runtime_error& ex)
+    {
+      RCOMPONENT_ERROR("Exception: [%s]", ex.what());
     }
   }
 
@@ -614,6 +617,112 @@ void RComponent::rosPublish()
   msg.state_description = getStateString();
 
   state_publisher.publish(msg);
+}
+
+/*!	\fn bool RComponent::checkTopicsHealth(std::string topic)
+ * 	\brief Checks the topic health of all the subscribed topics or specific ones
+ *  \param topic as std::string, topic to check. If empty all the topics are checked as a group
+ *  \return true if health is ok, false otherwise
+*/
+bool RComponent::checkTopicsHealth(std::string topic_id)
+{
+  std::map<std::string, TopicHealthMonitor>::iterator it;
+
+  if (data_health_monitors_.empty())
+  {
+    RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topics health monitor is empty");
+    return false;
+  }
+
+  if (topic_id.empty() == false)
+  {
+    it = data_health_monitors_.find(topic_id);
+
+    if (it != data_health_monitors_.end())
+    {
+      return it->second.isReceiving();
+    }
+    else
+    {
+      RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topic " << it->first << " not being received");
+      return false;
+    }
+  }
+  else
+  {
+    for (it = data_health_monitors_.begin(); it != data_health_monitors_.end(); ++it)
+    {
+      if (it->second.isReceiving() == false)
+      {
+        RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topic " << it->first << " not being received");
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+/*!	\fn int RComponent::addTopicsHealth(ros::Subscriber *subscriber = 0, std::string topic_id, double timeout)
+ * 	\brief Adds a topic health for the subscriber
+ *  \param subscriber as ros::Subscriber*, pointer to the Subscriber to check health
+ *  \param topic_id as std::string, topic id to associate with the subscriber. If empty it will use the full topic name
+ *  \param timeout as std::string, topic id to associate with the subscriber. If empty it will use the full topic name
+ *  \return 0 if ok, -1 otherwise
+*/
+int RComponent::addTopicsHealth(ros::Subscriber* subscriber, std::string topic_id, double timeout)
+{
+  std::string map_id;
+  if (subscriber == NULL)
+  {
+    RCOMPONENT_ERROR("Subscriber to check is NULL");
+    return -1;
+  }
+
+  if (topic_id.empty() == true)
+  {
+    map_id = subscriber->getTopic();
+  }
+  else
+  {
+    map_id = topic_id;
+  }
+  if (timeout <= 0)
+  {
+    RCOMPONENT_ERROR("timeout (%.lf) has to be >= 0", timeout);
+    timeout = 1.0;
+  }
+
+  data_health_monitors_[map_id] = TopicHealthMonitor(subscriber, timeout);
+
+  return 0;
+}
+
+/*!	\fn int RComponent::tickTopicsHealth(std::string topic_id)
+ * 	\brief Ticks the selected topic to notify that is being received
+ *  \param topic_id as std::string, topic id that identifies the subscriber
+ *  \return 0 if ok, -1 otherwise
+*/
+int RComponent::tickTopicsHealth(std::string topic_id)
+{
+  if (topic_id.empty() == true)
+  {
+    RCOMPONENT_ERROR_STREAM_THROTTLE(5, "topic id " << topic_id << " cannot be empty");
+    return -1;
+  }
+
+  std::map<std::string, TopicHealthMonitor>::iterator it;
+
+  it = data_health_monitors_.find(topic_id);
+
+  if (it != data_health_monitors_.end())
+  {
+    it->second.tick();
+    return 0;
+  }
+
+  RCOMPONENT_ERROR_STREAM_THROTTLE(5, "topic id " << topic_id << " does not exist");
+  return -1;
 }
 
 }  // namespace rcomponent

@@ -34,6 +34,7 @@
 #include <robotnik_msgs/State.h>
 
 #include <rcomponent/rcomponent_log_macros.h>
+#include <rcomponent/topic_health_monitor.h>
 #include <sstream>
 
 //! Size of string for logging
@@ -107,6 +108,9 @@ protected:
   //! Contains data for the main thread
   thread_data threadData;
 
+  //! Contains all the data health monitors
+  std::map<std::string, TopicHealthMonitor> data_health_monitors_;
+
 public:
   //! Public constructor
   RComponent();
@@ -166,6 +170,12 @@ public:
   const std::string getPublicNamespace();
   //! Returns the private namespace of the component
   const std::string getPrivateNamespace();
+  //! Returns true if the topics healht is
+  virtual bool checkTopicsHealth(std::string topic_id="");
+  //! Adds a topic health for the subscriber
+  virtual int addTopicsHealth(ros::Subscriber *subscriber = 0, std::string topic_id="", double timeout=5.0);
+  //! Ticks the selected topic
+  virtual int tickTopicsHealth(std::string topic_id);
 
 protected:
   //! Configures and initializes the component
