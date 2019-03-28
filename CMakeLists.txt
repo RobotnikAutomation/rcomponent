@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
 )
 
-# catkin_python_setup()
+catkin_python_setup()
 
 catkin_package(
   INCLUDE_DIRS
