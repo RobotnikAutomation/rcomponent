@@ -45,7 +45,7 @@ class RComponent:
 
     def __init__(self):
         self._node_name = rospy.get_name()
-        self.rosReadParams()
+        self.ros_read_params()
 
     	self._real_freq = 0.0
     	# Saves the state of the component
@@ -65,9 +65,9 @@ class RComponent:
     	# Timer to publish state
     	self._publish_state_timer = 1
 
-        self._t_publish_state = threading.Timer(self._publish_state_timer, self.publishROSstate)
+        self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
 
-    def rosReadParams(self):
+    def ros_read_params(self):
         '''
             Gets params from param server
         '''
@@ -92,7 +92,7 @@ class RComponent:
 
     	return 0
 
-    def rosSetup(self):
+    def ros_setup(self):
     	'''
     		Creates and inits ROS components
     	'''
@@ -103,16 +103,16 @@ class RComponent:
     	self._state_publisher = rospy.Publisher('~state', State, queue_size=10)
     	# Subscribers
     	# topic_name, msg type, callback, queue_size
-    	# self.topic_sub = rospy.Subscriber('topic_name', Int32, self.topicCb, queue_size = 10)
+    	# self.topic_sub = rospy.Subscriber('topic_name', Int32, self.topic_cb, queue_size = 10)
     	# Service Servers
-    	# self.service_server = rospy.Service('~service', Empty, self.serviceCb)
+    	# self.service_server = rospy.Service('~service', Empty, self.service_cb)
     	# Service Clients
     	# self.service_client = rospy.ServiceProxy('service_name', ServiceMsg)
     	# ret = self.service_client.call(ServiceMsg)
 
     	self._ros_initialized = True
 
-    	self.publishROSstate()
+    	self.publish_ros_state()
 
     	return 0
 
@@ -136,7 +136,7 @@ class RComponent:
     	return 0
 
 
-    def rosShutdown(self):
+    def ros_shutdown(self):
     	'''
     		Shutdows all ROS components
     		@return: 0 if it's performed successfully, -1 if there's any problem or the component is running
@@ -166,19 +166,19 @@ class RComponent:
     		Runs ROS configuration and the main control loop
     		@return: 0 if OK
     	'''
-    	self.rosSetup()
+    	self.ros_setup()
 
     	if self._running:
     		return 0
 
     	self._running = True
 
-    	self.controlLoop()
+    	self.control_loop()
 
     	return 0
 
 
-    def controlLoop(self):
+    def control_loop(self):
     	'''
     		Main loop of the component
     		Manages actions by state
@@ -188,24 +188,24 @@ class RComponent:
     		t1 = time.time()
 
     		if self._state == State.INIT_STATE:
-    			self.initState()
+    			self.init_state()
 
     		elif self._state == State.STANDBY_STATE:
-    			self.standbyState()
+    			self.standby_state()
 
     		elif self._state == State.READY_STATE:
-    			self.readyState()
+    			self.ready_state()
 
     		elif self._state == State.EMERGENCY_STATE:
-    			self.emergencyState()
+    			self.emergency_state()
 
     		elif self._state == State.FAILURE_STATE:
-    			self.failureState()
+    			self.failure_state()
 
     		elif self._state == State.SHUTDOWN_STATE:
-    			self.shutdownState()
+    			self.shutdown_state()
 
-    		self.allState()
+    		self.all_state()
 
     		t2 = time.time()
     		tdiff = (t2 - t1)
@@ -217,7 +217,7 @@ class RComponent:
     			try:
     				rospy.sleep(t_sleep)
     			except rospy.exceptions.ROSInterruptException:
-    				rospy.loginfo('%s::controlLoop: ROS interrupt exception'%self._node_name)
+    				rospy.loginfo('%s::control_loop: ROS interrupt exception'%self._node_name)
     				self._running = False
 
     		t3= time.time()
@@ -225,15 +225,15 @@ class RComponent:
 
     	self._running = False
     	# Performs component shutdown
-    	self.shutdownState()
+    	self.shutdown_state()
     	# Performs ROS shutdown
-    	self.rosShutdown()
-    	rospy.loginfo('%s::controlLoop: exit control loop'%self._node_name)
+    	self.ros_shutdown()
+    	rospy.loginfo('%s::control_loop: exit control loop'%self._node_name)
 
     	return 0
 
 
-    def rosPublish(self):
+    def ros_publish(self):
     	'''
     		Publish topics at standard frequency
     	'''
@@ -241,7 +241,7 @@ class RComponent:
     	return 0
 
 
-    def initState(self):
+    def init_state(self):
     	'''
     		Actions performed in init state
     	'''
@@ -250,22 +250,22 @@ class RComponent:
     		self.setup()
 
     	else:
-    		self.switchToState(State.STANDBY_STATE)
+    		self.switch_to_state(State.STANDBY_STATE)
 
 
     	return
 
 
-    def standbyState(self):
+    def standby_state(self):
     	'''
     		Actions performed in standby state
     	'''
-    	self.switchToState(State.READY_STATE)
+    	self.switch_to_state(State.READY_STATE)
 
     	return
 
 
-    def readyState(self):
+    def ready_state(self):
     	'''
     		Actions performed in ready state
     	'''
@@ -274,17 +274,17 @@ class RComponent:
     	return
 
 
-    def shutdownState(self):
+    def shutdown_state(self):
     	'''
     		Actions performed in shutdown state
     	'''
     	if self.shutdown() == 0:
-    		self.switchToState(State.INIT_STATE)
+    		self.switch_to_state(State.INIT_STATE)
 
     	return
 
 
-    def emergencyState(self):
+    def emergency_state(self):
     	'''
     		Actions performed in emergency state
     	'''
@@ -292,7 +292,7 @@ class RComponent:
     	return
 
 
-    def failureState(self):
+    def failure_state(self):
     	'''
     		Actions performed in failure state
     	'''
@@ -301,28 +301,28 @@ class RComponent:
     	return
 
 
-    def switchToState(self, new_state):
+    def switch_to_state(self, new_state):
     	'''
     		Performs the change of state
     	'''
     	if self._state != new_state:
     		self._previous_state = self._state
     		self._state = new_state
-    		rospy.loginfo('%s::switchToState: %s'%(self._node_name, self.stateToString(self._state)))
+    		rospy.loginfo('%s::switch_to_state: %s'%(self._node_name, self.state_to_string(self._state)))
 
     	return
 
 
-    def allState(self):
+    def all_state(self):
     	'''
     		Actions performed in all states
     	'''
-    	self.rosPublish()
+    	self.ros_publish()
 
     	return
 
 
-    def stateToString(self, state):
+    def state_to_string(self, state):
     	'''
     		@param state: state to set
     		@type state: State
@@ -349,38 +349,38 @@ class RComponent:
     		return 'UNKNOWN_STATE'
 
 
-    def publishROSstate(self):
+    def publish_ros_state(self):
     	'''
     		Publish the State of the component at the desired frequency
     	'''
     	self._msg_state.state = self._state
-    	self._msg_state.state_description = self.stateToString(self._state)
+    	self._msg_state.state_description = self.state_to_string(self._state)
     	self._msg_state.desired_freq = self._desired_freq
     	self._msg_state.real_freq = self._real_freq
     	self._state_publisher.publish(self._msg_state)
 
-    	self._t_publish_state = threading.Timer(self._publish_state_timer, self.publishROSstate)
+    	self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
     	self._t_publish_state.start()
 
     """
-    def topicCb(self, msg):
+    def topic_cb(self, msg):
     	'''
     		Callback for inelfe_video_manager state
     		@param msg: received message
     		@type msg: std_msgs/Int32
     	'''
     	# DEMO
-    	rospy.loginfo('RComponent:topicCb')
+    	rospy.loginfo('RComponent:topic_cb')
 
 
-    def serviceCb(self, req):
+    def service_cb(self, req):
     	'''
     		ROS service server
     		@param req: Required action
     		@type req: std_srv/Empty
     	'''
     	# DEMO
-    	rospy.loginfo('RComponent:serviceCb')
+    	rospy.loginfo('RComponent:service_cb')
     """
 
 '''
