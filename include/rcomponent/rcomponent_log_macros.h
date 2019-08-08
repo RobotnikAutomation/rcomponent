@@ -64,9 +64,8 @@
 #define RCOMPONENT_DEBUG_STREAM_ONCE(args)                                                                             \
   ROS_DEBUG_STREAM_ONCE(this->component_name << "::" << __FUNCTION__ << "::" << __LINE__ << ": " << args)
 
-#define RCOMPONENT_DEBUG_STREAM_ONCE_NAMED                                                                             \
-  (name, args)                                                                                                         \
-      ROS_DEBUG_STREAM_ONCE(name, this->component_name << "::" << __FUNCTION__ << "::" << __LINE__ << ": " << args)
+#define RCOMPONENT_DEBUG_STREAM_ONCE_NAMED(name, args)                                                                 \
+  ROS_DEBUG_STREAM_ONCE_NAMED(name, this->component_name << "::" << __FUNCTION__ << "::" << __LINE__ << ": " << args)
 
 #define RCOMPONENT_DEBUG_STREAM_THROTTLE(rate, args)                                                                   \
   ROS_DEBUG_STREAM_THROTTLE(rate, this->component_name << "::" << __FUNCTION__ << "::" << __LINE__ << ": " << args)
