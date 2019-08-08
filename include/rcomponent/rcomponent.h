@@ -249,6 +249,15 @@ protected:
     return true;
   }
 
+  // Double template type, used when type of default value does not match type or variable, but can be casted safely.
+  // Example: T is double, S is in, or T is std::string, S is "char *"
+  template <typename T, typename S>
+  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, const S& default_value,
+                 bool required = false)
+  {
+    return readParam(h, name, value, static_cast<T>(default_value), required);
+  }
+
   template <typename T>
   bool readParam(const ros::NodeHandle& h, const std::string& name, std::vector<T>& value,
                  const std::vector<T>& default_value, bool required = false)
