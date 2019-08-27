@@ -226,6 +226,9 @@ int RComponent::asyncStart()
   RCOMPONENT_DEBUG("Launching the thread");
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+  running = true;
+
   if (pthread_create(&threadData.pthreadId, &attr, &RComponent::asyncControlLoop, this) != 0)
   {
     RCOMPONENT_ERROR("Could not create ControlThread");
@@ -233,8 +236,6 @@ int RComponent::asyncStart()
     running = false;
     return ERROR;
   }
-
-  running = true;
 
   return OK;
 }
