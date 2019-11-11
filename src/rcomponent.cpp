@@ -649,11 +649,11 @@ bool RComponent::checkTopicsHealth(std::string topic_id)
       return false;
     }
   }
-  else
+  else  // Only check required topics
   {
     for (it = data_health_monitors_.begin(); it != data_health_monitors_.end(); ++it)
     {
-      if (it->second.isReceiving() == false)
+      if (it->second.isReceiving() == false && it->second.isRequired() == true)
       {
         RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topic " << it->first << " not being received");
         return false;
@@ -671,7 +671,7 @@ bool RComponent::checkTopicsHealth(std::string topic_id)
  *  \param timeout as std::string, topic id to associate with the subscriber. If empty it will use the full topic name
  *  \return 0 if ok, -1 otherwise
 */
-int RComponent::addTopicsHealth(ros::Subscriber* subscriber, std::string topic_id, double timeout)
+int RComponent::addTopicsHealth(ros::Subscriber* subscriber, std::string topic_id, double timeout, bool required)
 {
   std::string map_id;
   if (subscriber == NULL)

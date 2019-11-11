@@ -12,6 +12,8 @@ class TopicHealthMonitor
 private:
   //! timeout to consider that the topic is not receiving
   double topic_timeout_;
+  //! variable to know if stop receiving this topic is critical for the node
+  bool required_;
   //! saves the ros time of the last msg received
   ros::Time last_msg_time_;
   //! reference to the subscriber
@@ -22,11 +24,12 @@ public:
   {
   }
 
-  TopicHealthMonitor(ros::Subscriber* subscriber = 0, double timeout = 5.0)
+  TopicHealthMonitor(ros::Subscriber* subscriber = 0, double timeout = 5.0, bool required = true)
   {
     sub_ = subscriber;
     topic_timeout_ = timeout;
     last_msg_time_ = ros::Time(0);
+    required_ = required;
   }
 
   //!
@@ -49,6 +52,12 @@ public:
       return false;
 
     return true;
+  }
+
+  //! returns true if the topic is necessary for node
+  bool isRequired()
+  {
+    return required_;
   }
 
   void setSubscriber(ros::Subscriber* subscriber)
