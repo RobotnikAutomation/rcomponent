@@ -171,9 +171,9 @@ public:
   //! Returns the private namespace of the component
   const std::string getPrivateNamespace();
   //! Returns true if the topics healht is
-  virtual bool checkTopicsHealth(std::string topic_id="");
+  virtual bool checkTopicsHealth(std::string topic_id = "");
   //! Adds a topic health for the subscriber
-  virtual int addTopicsHealth(ros::Subscriber *subscriber = 0, std::string topic_id="", double timeout=5.0);
+  virtual int addTopicsHealth(ros::Subscriber* subscriber = 0, std::string topic_id = "", double timeout = 5.0);
   //! Ticks the selected topic
   virtual int tickTopicsHealth(std::string topic_id);
 
