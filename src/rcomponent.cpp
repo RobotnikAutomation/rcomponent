@@ -538,7 +538,74 @@ void RComponent::switchToState(int new_state)
   previous_state = state;
   RCOMPONENT_INFO("%s -> %s", getStateString(state), getStateString(new_state));
   state = new_state;
+  
+  switch (state)
+  {
+    case robotnik_msgs::State::INIT_STATE:
+      switchToInitState();
+      break;
+    case robotnik_msgs::State::STANDBY_STATE:
+      switchToStandbyState();
+      break;
+    case robotnik_msgs::State::READY_STATE:
+      switchToReadyState();
+      break;
+    case robotnik_msgs::State::EMERGENCY_STATE:
+      switchToEmergencyState();
+      break;
+    case robotnik_msgs::State::FAILURE_STATE:
+      switchToFailureState();
+      break;
+    case robotnik_msgs::State::SHUTDOWN_STATE:
+      switchToShutdownState();
+      break;
+  }
+
 }
+
+
+/*!	\fn void RComponent::switchToInitState()
+ * 	callback executed when moving to init state 
+*/
+void RComponent::switchToInitState(){
+
+}
+
+/*!	\fn void RComponent::switchToStandbyState()
+ * 	callback executed when moving to standby state 
+*/
+void RComponent::switchToStandbyState(){
+
+}
+
+/*!	\fn void RComponent::switchToReadyState()
+ * 	callback executed when moving to ready state 
+*/
+void RComponent::switchToReadyState(){
+
+}
+
+/*!	\fn void RComponent::switchToEmergencyState()
+ * 	callback executed when moving to emergency state 
+*/
+void RComponent::switchToEmergencyState(){
+
+}
+
+/*!	\fn void RComponent::switchToFailureState()
+ * 	callback executed when moving to failure state 
+*/
+void RComponent::switchToFailureState(){
+
+}
+
+/*!	\fn void RComponent::switchToShutdownState()
+ * 	callback executed when moving to shutdown state 
+*/
+void RComponent::switchToShutdownState(){
+
+}
+
 
 /*!	\fn void RComponent::rosSetup()
  * 	\brief Setups all ROS' stuff

@@ -211,6 +211,19 @@ protected:
   virtual void allState();
   //! Switches between states
   virtual void switchToState(int new_state);
+  //! callback executed when moving to init state 
+  virtual void switchToInitState();
+  //! callback executed when moving to standby state 
+  virtual void switchToStandbyState();
+  //! callback executed when moving to ready state 
+  virtual void switchToReadyState();
+  //! callback executed when moving to emergency state 
+  virtual void switchToEmergencyState();
+  //! callback executed when moving to failure state 
+  virtual void switchToFailureState();
+  //! callback executed when moving to shutdown state 
+  virtual void switchToShutdownState();
+
   //! Setups all the ROS' stuff
   virtual int rosSetup();
   //! Shutdowns all the ROS' stuff
@@ -291,13 +304,8 @@ protected:
     h.param<std::vector<T>>(name, value, default_value);
     return true;
   }
-  // this version, where default value is grabbed from the value of the variable, causes an ambiguous template
-  // substution when paramter type is bool
-  //  template <typename T>
-  //  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, bool required = false)
-  //  {
-  //    return readParam(h, name, value, value, required);
-  //  }
+  
+
 };
 }  // namespace rcomponent
 
