@@ -94,6 +94,8 @@ int RComponent::init(ros::NodeHandle h, ros::NodeHandle ph)
   threadData.pthreadPar.clock = CLOCK_REALTIME;  // 0-CLOCK_MONOTONIC 1-CLOCK_REALTIME
   constructed = true;
 
+  t_state_transition_ = ros::Time::now();
+
   return OK;
 }
 
@@ -538,7 +540,7 @@ void RComponent::switchToState(int new_state)
   previous_state = state;
   RCOMPONENT_INFO("%s -> %s", getStateString(state), getStateString(new_state));
   state = new_state;
-  
+
   switch (state)
   {
     case robotnik_msgs::State::INIT_STATE:
@@ -561,51 +563,50 @@ void RComponent::switchToState(int new_state)
       break;
   }
 
+  t_state_transition_ = ros::Time::now();
 }
 
-
 /*!	\fn void RComponent::switchToInitState()
- * 	callback executed when moving to init state 
+ * 	callback executed when moving to init state
 */
-void RComponent::switchToInitState(){
-
+void RComponent::switchToInitState()
+{
 }
 
 /*!	\fn void RComponent::switchToStandbyState()
- * 	callback executed when moving to standby state 
+ * 	callback executed when moving to standby state
 */
-void RComponent::switchToStandbyState(){
-
+void RComponent::switchToStandbyState()
+{
 }
 
 /*!	\fn void RComponent::switchToReadyState()
- * 	callback executed when moving to ready state 
+ * 	callback executed when moving to ready state
 */
-void RComponent::switchToReadyState(){
-
+void RComponent::switchToReadyState()
+{
 }
 
 /*!	\fn void RComponent::switchToEmergencyState()
- * 	callback executed when moving to emergency state 
+ * 	callback executed when moving to emergency state
 */
-void RComponent::switchToEmergencyState(){
-
+void RComponent::switchToEmergencyState()
+{
 }
 
 /*!	\fn void RComponent::switchToFailureState()
- * 	callback executed when moving to failure state 
+ * 	callback executed when moving to failure state
 */
-void RComponent::switchToFailureState(){
-
+void RComponent::switchToFailureState()
+{
 }
 
 /*!	\fn void RComponent::switchToShutdownState()
- * 	callback executed when moving to shutdown state 
+ * 	callback executed when moving to shutdown state
 */
-void RComponent::switchToShutdownState(){
-
+void RComponent::switchToShutdownState()
+{
 }
-
 
 /*!	\fn void RComponent::rosSetup()
  * 	\brief Setups all ROS' stuff
@@ -791,6 +792,22 @@ int RComponent::tickTopicsHealth(std::string topic_id)
 
   RCOMPONENT_ERROR_STREAM_THROTTLE(5, "topic id " << topic_id << " does not exist");
   return -1;
+}
+
+/*!	\fn ros::Duration RComponent::getElapsedTimeSinceLastStateTransition()
+ * 	\brief Returns the elapsed time since the last state transition
+*/
+ros::Duration RComponent::getElapsedTimeSinceLastStateTransition()
+{
+  return ros::Time::now() - t_state_transition_;
+}
+
+/*!	\fn ros::Time RComponent::getElapsedTimeSinceLastStateTransition()
+ * 	\brief Returns the state transition time
+*/
+ros::Time RComponent::getStateTransitionTime()
+{
+  return t_state_transition_;
 }
 
 }  // namespace rcomponent

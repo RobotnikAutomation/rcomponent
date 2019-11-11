@@ -111,6 +111,9 @@ protected:
   //! Contains all the data health monitors
   std::map<std::string, TopicHealthMonitor> data_health_monitors_;
 
+  //! Saves the time of a state transition
+  ros::Time t_state_transition_;
+
 public:
   //! Public constructor
   RComponent();
@@ -177,6 +180,10 @@ public:
                               bool required = true);
   //! Ticks the selected topic
   virtual int tickTopicsHealth(std::string topic_id);
+  //! Returns the elapsed time since the last state transition
+  ros::Duration getElapsedTimeSinceLastStateTransition();
+  //! Returns the state transition time
+  ros::Time getStateTransitionTime();
 
 protected:
   //! Configures and initializes the component
@@ -211,17 +218,17 @@ protected:
   virtual void allState();
   //! Switches between states
   virtual void switchToState(int new_state);
-  //! callback executed when moving to init state 
+  //! callback executed when moving to init state
   virtual void switchToInitState();
-  //! callback executed when moving to standby state 
+  //! callback executed when moving to standby state
   virtual void switchToStandbyState();
-  //! callback executed when moving to ready state 
+  //! callback executed when moving to ready state
   virtual void switchToReadyState();
-  //! callback executed when moving to emergency state 
+  //! callback executed when moving to emergency state
   virtual void switchToEmergencyState();
-  //! callback executed when moving to failure state 
+  //! callback executed when moving to failure state
   virtual void switchToFailureState();
-  //! callback executed when moving to shutdown state 
+  //! callback executed when moving to shutdown state
   virtual void switchToShutdownState();
 
   //! Setups all the ROS' stuff
@@ -304,8 +311,6 @@ protected:
     h.param<std::vector<T>>(name, value, default_value);
     return true;
   }
-  
-
 };
 }  // namespace rcomponent
 
