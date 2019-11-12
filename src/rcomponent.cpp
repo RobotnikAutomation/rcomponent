@@ -762,7 +762,7 @@ int RComponent::addTopicsHealth(ros::Subscriber* subscriber, std::string topic_i
     timeout = 1.0;
   }
 
-  data_health_monitors_[map_id] = TopicHealthMonitor(subscriber, timeout);
+  data_health_monitors_[map_id] = TopicHealthMonitor(subscriber, timeout, required);
 
   return 0;
 }
