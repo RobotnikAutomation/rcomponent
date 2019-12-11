@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotnik_msgs
   diagnostic_msgs
   diagnostic_updater
+  self_test
 )
 
 catkin_python_setup()
