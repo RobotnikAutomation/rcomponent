@@ -21,6 +21,7 @@ catkin_package(
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
+    robotnik_msgs
   DEPENDS
 )
 
