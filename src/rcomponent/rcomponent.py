@@ -290,12 +290,13 @@ class RComponent:
 
     def switch_to_state(self, new_state):
         '''
-                Performs the change of state 
+                Performs the change of state
         '''
         if self._state != new_state:
             self._previous_state = self._state
             self._state = new_state
-            rospy.loginfo('%s::switch_to_state: %s' % (self._node_name, self.state_to_string(self._state)))
+            rospy.loginfo('%s::switch_to_state: from %s to %s' % (self._node_name,
+                                                                  self.state_to_string(self._previous_state), self.state_to_string(self._state)))
 
         return
 
@@ -341,10 +342,11 @@ class RComponent:
         self._msg_state.state_description = self.state_to_string(self._state)
         self._msg_state.desired_freq = self._desired_freq
         self._msg_state.real_freq = self._real_freq
-        self._state_publisher.publish(self._msg_state)
 
-        self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
-        self._t_publish_state.start()
+        if rospy.is_shutdown() == False:
+            self._state_publisher.publish(self._msg_state)
+            self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
+            self._t_publish_state.start()
 
     """
     def topic_cb(self, msg):
