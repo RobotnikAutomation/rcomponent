@@ -69,6 +69,8 @@ class RComponent:
         self._publish_state_timer = 1
 
         self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
+        # to save the time of the last state transition
+        self._t_state_transition = rospy.Time(0)
 
     def ros_read_params(self):
         '''
@@ -292,13 +294,67 @@ class RComponent:
         '''
                 Performs the change of state
         '''
-        if self._state != new_state:
-            self._previous_state = self._state
-            self._state = new_state
-            rospy.loginfo('%s::switch_to_state: from %s to %s' % (self._node_name,
-                                                                  self.state_to_string(self._previous_state), self.state_to_string(self._state)))
+
+        if self._state == new_state:
+            return
+
+        if new_state == State.INIT_STATE:
+            self.switch_to_init_state()
+        elif new_state == State.STANDBY_STATE:
+            self.switch_to_standby_state()
+        elif new_state == State.READY_STATE:
+            self.switch_to_ready_state()
+        elif new_state == State.EMERGENCY_STATE:
+            self.switch_to_emergency_state()
+        elif new_state == State.FAILURE_STATE:
+            self.switch_to_failure_state()
+        elif new_state == State.SHUTDOWN_STATE:
+            self.switch_to_shutdown_state()
+
+        self._previous_state = self._state
+        self._state = new_state
+        rospy.loginfo('%s::switch_to_state: from %s to %s' %
+                      (self._node_name, self.state_to_string(self._previous_state), self.state_to_string(self._state)))
+
+        self._t_state_transition = rospy.Time.now()
 
         return
+
+    def switch_to_init_state(self):
+        '''
+            Function called during the transition to init_state
+        '''
+        pass
+
+    def switch_to_standby_state(self):
+        '''
+            Function called during the transition to standby_state
+        '''
+        pass
+
+    def switch_to_ready_state(self):
+        '''
+            Function called during the transition to ready_state
+        '''
+        pass
+
+    def switch_to_emergency_state(self):
+        '''
+            Function called during the transition to emergency_state
+        '''
+        pass
+
+    def switch_to_failure_state(self):
+        '''
+            Function called during the transition to failure_state
+        '''
+        pass
+
+    def switch_to_shutdown_state(self):
+        '''
+            Function called during the transition to shutdown_state
+        '''
+        pass
 
     def all_state(self):
         '''
@@ -347,6 +403,18 @@ class RComponent:
             self._state_publisher.publish(self._msg_state)
             self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
             self._t_publish_state.start()
+
+    def get_state_transition_elapsed_time(self):
+        '''
+            @returns the elapsed time since the last state transition as rospy.Time.Duration
+        '''
+        return rospy.Time.now() - self._t_state_transition
+
+    def get_state_transition_time(self):
+        '''
+            @returns the current value of the state transition time
+        '''
+        return self._t_state_transition
 
     """
     def topic_cb(self, msg):
