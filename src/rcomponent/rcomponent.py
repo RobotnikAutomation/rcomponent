@@ -37,6 +37,8 @@ import rospy
 import time
 import threading
 
+from topic_health_monitor import TopicHealthMonitor
+
 from robotnik_msgs.msg import State
 
 DEFAULT_FREQ = 10.0
@@ -69,6 +71,10 @@ class RComponent:
         self._publish_state_timer = 1
 
         self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
+        # to save the time of the last state transition
+        self._t_state_transition = rospy.Time(0)
+        # dict to save all the topic health monitor objects
+        self._data_health_monitors = {}
 
     def ros_read_params(self):
         '''
@@ -292,13 +298,67 @@ class RComponent:
         '''
                 Performs the change of state
         '''
-        if self._state != new_state:
-            self._previous_state = self._state
-            self._state = new_state
-            rospy.loginfo('%s::switch_to_state: from %s to %s' % (self._node_name,
-                                                                  self.state_to_string(self._previous_state), self.state_to_string(self._state)))
+
+        if self._state == new_state:
+            return
+
+        if new_state == State.INIT_STATE:
+            self.switch_to_init_state()
+        elif new_state == State.STANDBY_STATE:
+            self.switch_to_standby_state()
+        elif new_state == State.READY_STATE:
+            self.switch_to_ready_state()
+        elif new_state == State.EMERGENCY_STATE:
+            self.switch_to_emergency_state()
+        elif new_state == State.FAILURE_STATE:
+            self.switch_to_failure_state()
+        elif new_state == State.SHUTDOWN_STATE:
+            self.switch_to_shutdown_state()
+
+        self._previous_state = self._state
+        self._state = new_state
+        rospy.loginfo('%s::switch_to_state: from %s to %s' %
+                      (self._node_name, self.state_to_string(self._previous_state), self.state_to_string(self._state)))
+
+        self._t_state_transition = rospy.Time.now()
 
         return
+
+    def switch_to_init_state(self):
+        '''
+            Function called during the transition to init_state
+        '''
+        pass
+
+    def switch_to_standby_state(self):
+        '''
+            Function called during the transition to standby_state
+        '''
+        pass
+
+    def switch_to_ready_state(self):
+        '''
+            Function called during the transition to ready_state
+        '''
+        pass
+
+    def switch_to_emergency_state(self):
+        '''
+            Function called during the transition to emergency_state
+        '''
+        pass
+
+    def switch_to_failure_state(self):
+        '''
+            Function called during the transition to failure_state
+        '''
+        pass
+
+    def switch_to_shutdown_state(self):
+        '''
+            Function called during the transition to shutdown_state
+        '''
+        pass
 
     def all_state(self):
         '''
@@ -347,6 +407,89 @@ class RComponent:
             self._state_publisher.publish(self._msg_state)
             self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
             self._t_publish_state.start()
+
+    def get_state_transition_elapsed_time(self):
+        '''
+            @returns the elapsed time since the last state transition as rospy.Time.Duration
+        '''
+        return rospy.Time.now() - self._t_state_transition
+
+    def get_state_transition_time(self):
+        '''
+            @returns the current value of the state transition time
+        '''
+        return self._t_state_transition
+
+    def add_topics_health(self, subscriber, topic_id='', timeout=5.0, required=True):
+        '''
+            @brief Adds a topic health for the subscriber
+            @param subscriber as a rospy.Subscriber to check
+            @param topic_id as string. Id associated to the topic. If empty it will use the full topic name
+            @param timeout as double. Timeout to consider that the topic is not receiving data anymore
+            @param required as bool. Flag to include this topic when it checks the overall status of the topics
+            @return 0 if ok
+            @return -1 if error
+        '''
+        if type(subscriber) is not rospy.Subscriber:
+            rospy.logerr('%s::add_topics_health: the object subscribed is not the correct type -> %s',
+                         self._node_name, type(subscriber))
+            return -1
+
+        _topic_id = ''
+        if topic_id != '':
+            _topic_id = topic_id
+        else:
+            _topic_id = subscriber.resolved_name
+
+        if timeout <= 0:
+            rospy.logerr('%s::add_topics_health: timeout (%.lf) has to be >= 0. Setting 1.', self._node_name, timeout)
+            timeout = 1.0
+
+        self._data_health_monitors[_topic_id] = TopicHealthMonitor(subscriber, timeout, required)
+        rospy.loginfo('%s::add_topics_health: Add topic %s', self._node_name, _topic_id)
+        return 0
+
+    def tick_topics_health(self, topic_id):
+        '''
+            @brief Ticks a topic health as it is receiving data
+            @return 0 if OK
+            @return -1 if the id doesn't exist
+        '''
+        if topic_id not in self._data_health_monitors:
+            rospy.logerr('%s::tick_topics_health: the topic %s does not exist!', self._node_name, topic_id)
+            return -1
+
+        self._data_health_monitors[topic_id].tick()
+
+    def check_topics_health(self, topic_id=''):
+        '''
+            @brief Checks the topic health of all the subscribed topics or specific ones
+            @param topic as string, topic to check. If empty all the topics are checked as a group
+            @return true if health is ok, false otherwise
+        '''
+        if len(self._data_health_monitors) == 0:
+            rospy.logerr('%s::check_topics_health: no topics to check!', self._node_name)
+            return False
+
+        if topic_id != '':
+            if topic_id not in self._data_health_monitors:
+                rospy.logerr('%s::check_topics_health: the topic %s does not exist!', self._node_name, topic_id)
+                return False
+            else:
+                return self._data_health_monitors[topic_id].is_receiving()
+
+        ret = True
+        topics_not_received = []
+        for i in self._data_health_monitors:
+            if self._data_health_monitors[i].is_required() and self._data_health_monitors[i].is_receiving() == False:
+                ret = False
+                topics_not_received.append(i)
+
+        if ret == False:
+            rospy.logwarn_throttle(5, '%s::check_topics_health: topic(s) %s not receiving' %
+                                   (self._node_name, str(topics_not_received)))
+
+        return ret
 
     """
     def topic_cb(self, msg):
