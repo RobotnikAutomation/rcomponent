@@ -5,13 +5,12 @@
   <description>The rcomponent package. Component used as templates for new ROS nodes</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
-  <!-- Example:  -->
-  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
   <maintainer email="rnavarro@robotnik.es">Román Navarro</maintainer>
   <maintainer email="rguzman@robotnik.es">Roberto Guzmán</maintainer>
   <maintainer email="mbosch@robotnik.es">March Bosch</maintainer>
   <maintainer email="dredo@robotnik.es">David Redó</maintainer>
   <maintainer email="aarnal@robotnik.es">Alex Arnal</maintainer>
+  <maintainer email="jgomez@robotnik.es">José Gómez</maintainer>
 
   <license>BSD</license>
 
