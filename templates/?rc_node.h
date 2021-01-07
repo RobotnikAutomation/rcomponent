@@ -1,12 +1,3 @@
-/*! \class ?RCNode
- *  \file ?rc_node.h
- *	\author Robotnik Automation S.L.L
- *	\version 0.1.0
- *	\date ?year
- *  \brief ?brief
- *
- */
-
 #ifndef _?RC_NODE_
 #define _?RC_NODE_
 
@@ -18,6 +9,8 @@
 // Insert here msg and srv includes:
 #include <std_msgs/String.h>
 #include <robotnik_msgs/StringStamped.h>
+
+#include <std_srvs/Trigger.h>
 
 class ?RCNode : public rcomponent::RComponent
 {
@@ -60,18 +53,26 @@ protected:
   // Publishers
 
   //! To publish the basic information
-  ros::Publisher ?rc_node_data_pub_;
-  ros::Publisher ?rc_node_data_stamped_pub_;
+  ros::Publisher data_pub_;
+  ros::Publisher data_stamped_pub_;
 
   //! Subscribers
   ros::Subscriber example_sub_;
-  string example_sub_name_; // Name of the example_sub_ topic
+  string example_subscriber_name_; // Name of the example_sub_ topic
+
+  //! Services
+  ros::ServiceServer example_server_;
+
+  //! Callbacks
+  void exampleSubCb(const std_msgs::String::ConstPtr& msg);
+
+  void exampleServerCb(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
   /* ROS stuff !*/
 
   /* ?RCNode stuff */
 
-  std_msgs::String ?rc_node_data_;
+  std_msgs::String data_;
 
   /* ?RCNode stuff !*/
 

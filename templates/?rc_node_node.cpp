@@ -1,9 +1,10 @@
-/*! \file ?rc_node_node.cpp
- *	\author Robotnik Automation S.L.L
- *	\version 0.1.0
- *	\date ?year
- *  \brief ?brief
- *
- */
+#include <?rc_package/?rc_node.h>
 
-TODO
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "?rc_node");
+  ros::NodeHandle n;
+
+  ?RCNode ?rc_node(n);
+  ?rc_node.start();
+}
