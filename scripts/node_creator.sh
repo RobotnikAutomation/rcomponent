@@ -19,8 +19,16 @@ yellow="\e[1;33m"
 
 # SCRIPT INTRODUCTION
 
-clear
-echo -e "\n${bold}Welcome to the node creator assistant."
+# Request sudo permissions
+sudo clear
+retval=$?
+if [ $retval -ne 0 ]
+then
+    echo -e "\n${bold}${red}You need sudo permissions. Stopping the script."
+    exit 1
+fi
+
+echo -e "\n${bold}${yellow}Welcome to the node creator assistant."
 
 echo -e -n "\n${reset}The goal of this script is to simplify the creation of new "
 echo -e    "rcomponent-based nodes."
@@ -46,7 +54,7 @@ echo -e    "${italic}odometry_calibration${reset}): "
 read rc_package
 if [ -z "$rc_package" ]
 then
-    echo -e "${bold}You have skipped a required argument. Stopping the script."
+    echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
     exit 1
 fi
 
@@ -56,7 +64,7 @@ echo -e    "${italic}OdomCalibration${reset}): "
 read RCNode
 if [ -z "$RCNode" ]
 then
-    echo -e "${bold}You have skipped a required argument. Stopping the script."
+    echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
     exit 1
 fi
 
@@ -66,7 +74,7 @@ echo -e    "${italic}odom_calibration${reset}): "
 read rc_node
 if [ -z "$rc_node" ]
 then
-    echo -e "${bold}You have skipped a required argument. Stopping the script."
+    echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
     exit 1
 fi
 
