@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>?rc_package</name>
   <version>0.1.0</version>
-  <description>The ?rc_package package. ?brief</description>
+  <description>The ?rc_package package, based on RComponent structure. ?brief</description>
 
   <maintainer email="?authorEmail">?authorName</maintainer>
 
@@ -21,11 +21,11 @@
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
 
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>rcomponent</run_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>rcomponent</exec_depend>
 
   <export>
 

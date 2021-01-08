@@ -57,7 +57,7 @@ class ?RCNode(RComponent):
 
         data_stamped = StringStamped()
         data_stamped.header.stamp = rospy.Time.now()
-        data_stamped.string = self.data
+        data_stamped.string = self.data.data
 
         self.data_pub.publish(self.data)
         self.data_stamped_pub.publish(data_stamped)
@@ -80,10 +80,10 @@ class ?RCNode(RComponent):
         return RComponent.switch_to_state(self, new_state)
 
     def example_sub_cb(self, msg):
-        ros.loginfo("Received msg: " + msg.data)
+        rospy.logwarn("Received msg: " + msg.data)
 
     def example_server_cb(self, req):
-        ros.loginfo("Received srv trigger petition.")
+        rospy.logwarn("Received srv trigger petition.")
 
         response = TriggerResponse()
         response.success = True

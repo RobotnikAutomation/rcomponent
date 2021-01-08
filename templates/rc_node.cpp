@@ -35,7 +35,7 @@ int ?RCNode::rosSetup()
   addTopicsHealth(&example_sub_, "example_sub", 50.0, not_required);
 
   // Service
-  example_server_ = pnh_.advertiseService("start_calibration", &?RCNode::exampleServerCb, this);
+  example_server_ = pnh_.advertiseService("example", &?RCNode::exampleServerCb, this);
 }
 
 int ?RCNode::rosShutdown()
@@ -54,7 +54,7 @@ void ?RCNode::rosPublish()
     data_pub_.publish(data_);
 
     data_stamped.header.stamp = ros::Time::now();
-    data_stamped.string = data_;
+    data_stamped.string = data_.data;
     data_stamped_pub_.publish(data_stamped);
   }
 }

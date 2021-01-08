@@ -1,6 +1,6 @@
 # ?rc_package
 
-The ?rc_package package. ?brief
+The ?rc_package package, based on RComponent structure. ?brief
 
 ## Installation
 

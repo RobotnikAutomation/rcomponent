@@ -39,12 +39,6 @@ protected:
   virtual void emergencyState();
   //! Actions performed on Failure state
   virtual void failureState();
-  //! callback executed when moving to emergency state
-  virtual void switchToEmergencyState();
-  //! callback executed when moving to failure state
-  virtual void switchToFailureState();
-  //! control loop
-  virtual void controlLoop();
 
   /* RComponent stuff !*/
 
@@ -66,7 +60,7 @@ protected:
   //! Callbacks
   void exampleSubCb(const std_msgs::String::ConstPtr& msg);
 
-  void exampleServerCb(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+  bool exampleServerCb(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
   /* ROS stuff !*/
 

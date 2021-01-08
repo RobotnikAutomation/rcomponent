@@ -136,7 +136,7 @@ templates_path=`pwd roscd rcomponent`"/templates"
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/include/$rc_package
 mkdir $pkg_path/launch
-mkdir $pkg_path/src
+mkdir $pkg_path/src/$rc_package
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"
@@ -173,3 +173,105 @@ rc_node_cpp_launch=${rc_node_cpp_launch//"?authorName"/$authorName}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?authorEmail"/$authorEmail}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?brief"/$brief}
 echo $rc_node_cpp_launch > $pkg_path/launch/$rc_node"_cpp.launch"
+
+# Create python files
+touch $pkg_path/src/$rc_package/__init__.py
+
+setup_py="$(cat $templates_path/setup.py)"
+setup_py=${setup_py//"?rc_package"/$rc_package}
+setup_py=${setup_py//"?RCNode"/$RCNode}
+setup_py=${setup_py//"?rc_node"/$rc_node}
+setup_py=${setup_py//"?RC_NODE"/$RC_NODE}
+setup_py=${setup_py//"?authorName"/$authorName}
+setup_py=${setup_py//"?authorEmail"/$authorEmail}
+setup_py=${setup_py//"?brief"/$brief}
+echo $setup_py > $pkg_path/setup.py
+
+rc_node_py="$(cat $templates_path/rc_node.py)"
+rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
+rc_node_py=${rc_node_py//"?RCNode"/$RCNode}
+rc_node_py=${rc_node_py//"?rc_node"/$rc_node}
+rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
+rc_node_py=${rc_node_py//"?authorName"/$authorName}
+rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
+rc_node_py=${rc_node_py//"?brief"/$brief}
+echo $rc_node_py > $pkg_path/src/$rc_package/$rc_node.py
+
+rc_node_node_py="$(cat $templates_path/rc_node_node.py)"
+rc_node_node_py=${rc_node_node_py//"?rc_package"/$rc_package}
+rc_node_node_py=${rc_node_node_py//"?RCNode"/$RCNode}
+rc_node_node_py=${rc_node_node_py//"?rc_node"/$rc_node}
+rc_node_node_py=${rc_node_node_py//"?RC_NODE"/$RC_NODE}
+rc_node_node_py=${rc_node_node_py//"?authorName"/$authorName}
+rc_node_node_py=${rc_node_node_py//"?authorEmail"/$authorEmail}
+rc_node_node_py=${rc_node_node_py//"?brief"/$brief}
+echo $rc_node_node_py > $pkg_path/src/$rc_package/$rc_node"_node.py"
+chmod +x $pkg_path/src/$rc_package/$rc_node"_node.py"
+
+# Create C++ src files
+rc_node_cpp="$(cat $templates_path/rc_node.cpp)"
+rc_node_cpp=${rc_node_cpp//"?rc_package"/$rc_package}
+rc_node_cpp=${rc_node_cpp//"?RCNode"/$RCNode}
+rc_node_cpp=${rc_node_cpp//"?rc_node"/$rc_node}
+rc_node_cpp=${rc_node_cpp//"?RC_NODE"/$RC_NODE}
+rc_node_cpp=${rc_node_cpp//"?authorName"/$authorName}
+rc_node_cpp=${rc_node_cpp//"?authorEmail"/$authorEmail}
+rc_node_cpp=${rc_node_cpp//"?brief"/$brief}
+echo $rc_node_cpp > $pkg_path/src/$rc_node.cpp
+
+rc_node_node_cpp="$(cat $templates_path/rc_node_node.cpp)"
+rc_node_node_cpp=${rc_node_node_cpp//"?rc_package"/$rc_package}
+rc_node_node_cpp=${rc_node_node_cpp//"?RCNode"/$RCNode}
+rc_node_node_cpp=${rc_node_node_cpp//"?rc_node"/$rc_node}
+rc_node_node_cpp=${rc_node_node_cpp//"?RC_NODE"/$RC_NODE}
+rc_node_node_cpp=${rc_node_node_cpp//"?authorName"/$authorName}
+rc_node_node_cpp=${rc_node_node_cpp//"?authorEmail"/$authorEmail}
+rc_node_node_cpp=${rc_node_node_cpp//"?brief"/$brief}
+echo $rc_node_node_cpp > $pkg_path/src/$rc_node"_node.cpp"
+
+# Changelog file
+changelog="$(cat $templates_path/CHANGELOG.rst)"
+changelog=${changelog//"?rc_package"/$rc_package}
+changelog=${changelog//"?RCNode"/$RCNode}
+changelog=${changelog//"?rc_node"/$rc_node}
+changelog=${changelog//"?RC_NODE"/$RC_NODE}
+changelog=${changelog//"?authorName"/$authorName}
+changelog=${changelog//"?authorEmail"/$authorEmail}
+changelog=${changelog//"?brief"/$brief}
+echo $changelog > $pkg_path/CHANGELOG.rst
+
+# CMakeLists file
+cmakelists="$(cat $templates_path/CMakeLists.txt)"
+cmakelists=${cmakelists//"?rc_package"/$rc_package}
+cmakelists=${cmakelists//"?RCNode"/$RCNode}
+cmakelists=${cmakelists//"?rc_node"/$rc_node}
+cmakelists=${cmakelists//"?RC_NODE"/$RC_NODE}
+cmakelists=${cmakelists//"?authorName"/$authorName}
+cmakelists=${cmakelists//"?authorEmail"/$authorEmail}
+cmakelists=${cmakelists//"?brief"/$brief}
+echo $cmakelists > $pkg_path/CMakeLists.txt
+
+# package.xml file
+pkg_xml="$(cat $templates_path/package.xml)"
+pkg_xml=${pkg_xml//"?rc_package"/$rc_package}
+pkg_xml=${pkg_xml//"?RCNode"/$RCNode}
+pkg_xml=${pkg_xml//"?rc_node"/$rc_node}
+pkg_xml=${pkg_xml//"?RC_NODE"/$RC_NODE}
+pkg_xml=${pkg_xml//"?authorName"/$authorName}
+pkg_xml=${pkg_xml//"?authorEmail"/$authorEmail}
+pkg_xml=${pkg_xml//"?brief"/$brief}
+echo $pkg_xml > $pkg_path/package.xml
+
+# Readme file
+readme="$(cat $templates_path/README.md)"
+readme=${readme//"?rc_package"/$rc_package}
+readme=${readme//"?RCNode"/$RCNode}
+readme=${readme//"?rc_node"/$rc_node}
+readme=${readme//"?RC_NODE"/$RC_NODE}
+readme=${readme//"?authorName"/$authorName}
+readme=${readme//"?authorEmail"/$authorEmail}
+readme=${readme//"?brief"/$brief}
+echo $readme > $pkg_path/README.md
+
+# Gitignore file
+cp $templates_path/.gitignore $pkg_path/.gitignore
