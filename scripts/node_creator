@@ -36,14 +36,16 @@ fi
 # SCRIPT INTRODUCTION
 
 # Request sudo permissions
-sudo clear
-retval=$?
-if [ $retval -ne 0 ]
-then
-    echo -e "\n${bold}${red}You need sudo permissions. Stopping the script."
-    exit 1
-fi
+#sudo clear
+#retval=$?
+#if [ $retval -ne 0 ]
+#then
+#    echo -e "\n${bold}${red}You need sudo permissions. Stopping the script."
+#    exit 1
+#fi
+
 # Introduction to the script
+clear
 echo -e "\n${bold}${yellow}Welcome to the node creator assistant."
 echo -e -n "\n${reset}The goal of this script is to simplify the creation of new "
 echo -e    "rcomponent-based nodes."
@@ -136,7 +138,7 @@ templates_path=`pwd roscd rcomponent`"/templates"
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/include/$rc_package
 mkdir $pkg_path/launch
-mkdir $pkg_path/src/$rc_package
+mkdir -p $pkg_path/src/$rc_package
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"

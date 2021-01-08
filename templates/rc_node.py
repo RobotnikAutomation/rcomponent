@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from rcomponent.rcomponent import *
 
 # Insert here general imports:
