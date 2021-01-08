@@ -70,8 +70,8 @@ install(TARGETS ${PROJECT_NAME} ?rc_node_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-## Uncomment for adding launch and config folders to .deb generation
-# install(
-#   DIRECTORY launch config
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+## Modify this if launch or config folders are deleted
+install(
+  DIRECTORY launch config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

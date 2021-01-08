@@ -7,6 +7,9 @@
 	<!-- Name of the example of a subscriber -->
 	<arg name="example_subscriber_name" default="example" />
 
+	<!-- Load .yaml example -->
+	<rosparam file="$(find ?rc_package)/config/example.yaml" command="load" />
+
 	<group ns="$(arg id_robot)">
 
 		<!-- start ?RCNode node -->
