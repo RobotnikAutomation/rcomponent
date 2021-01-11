@@ -149,40 +149,33 @@ new_node_h=${new_node_h//"?RCNode"/$NewNode}
 new_node_h=${new_node_h//"?rc_node"/$new_node}
 new_node_h=${new_node_h//"?RC_NODE"/$NEW_NODE}
 new_node_h=${new_node_h//"rcomponent::RComponent"/$ParentNode}
-new_node_h=${new_node_h//"?authorName"/$authorName}
-new_node_h=${new_node_h//"?authorEmail"/$authorEmail}
-new_node_h=${new_node_h//"?brief"/$brief}
 echo $new_node_h > $pkg_path/include/$pkg_name/$new_node.h
-: '
+
 # Create .launch
-rc_node_cpp_launch="$(cat $templates_path/rc_node_cpp.launch)"
-rc_node_cpp_launch=${rc_node_cpp_launch//"?rc_package"/$rc_package}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?RCNode"/$RCNode}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?rc_node"/$rc_node}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?RC_NODE"/$RC_NODE}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?authorName"/$authorName}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?authorEmail"/$authorEmail}
-rc_node_cpp_launch=${rc_node_cpp_launch//"?brief"/$brief}
-echo $rc_node_cpp_launch > $pkg_path/launch/$rc_node"_cpp.launch"
+new_node_launch="$(cat $templates_path/rc_node_cpp.launch)"
+new_node_launch=${new_node_launch//"?rc_package"/$pkg_name}
+new_node_launch=${new_node_launch//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
+new_node_launch=${new_node_launch//"?RCNode"/$NewNode}
+new_node_launch=${new_node_launch//"?rc_node"/$new_node}
+new_node_launch=${new_node_launch//"?RC_NODE"/$NEW_NODE}
+new_node_launch=${new_node_launch//"rcomponent::RComponent"/$ParentNode}
+echo $new_node_launch > $pkg_path/launch/$new_node.launch
 
 # Create C++ src files
-rc_node_cpp="$(cat $templates_path/rc_node.cpp)"
-rc_node_cpp=${rc_node_cpp//"?rc_package"/$rc_package}
-rc_node_cpp=${rc_node_cpp//"?RCNode"/$RCNode}
-rc_node_cpp=${rc_node_cpp//"?rc_node"/$rc_node}
-rc_node_cpp=${rc_node_cpp//"?RC_NODE"/$RC_NODE}
-rc_node_cpp=${rc_node_cpp//"?authorName"/$authorName}
-rc_node_cpp=${rc_node_cpp//"?authorEmail"/$authorEmail}
-rc_node_cpp=${rc_node_cpp//"?brief"/$brief}
-echo $rc_node_cpp > $pkg_path/src/$rc_node.cpp
+new_node_cpp="$(cat $templates_path/rc_node.cpp)"
+new_node_cpp=${new_node_cpp//"?rc_package"/$pkg_name}
+new_node_cpp=${new_node_cpp//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
+new_node_cpp=${new_node_cpp//"?RCNode"/$NewNode}
+new_node_cpp=${new_node_cpp//"?rc_node"/$new_node}
+new_node_cpp=${new_node_cpp//"?RC_NODE"/$NEW_NODE}
+new_node_cpp=${new_node_cpp//"rcomponent::RComponent"/$ParentNode}
+echo $new_node_cpp > $pkg_path/src/$new_node.cpp
 
-rc_node_node_cpp="$(cat $templates_path/rc_node_node.cpp)"
-rc_node_node_cpp=${rc_node_node_cpp//"?rc_package"/$rc_package}
-rc_node_node_cpp=${rc_node_node_cpp//"?RCNode"/$RCNode}
-rc_node_node_cpp=${rc_node_node_cpp//"?rc_node"/$rc_node}
-rc_node_node_cpp=${rc_node_node_cpp//"?RC_NODE"/$RC_NODE}
-rc_node_node_cpp=${rc_node_node_cpp//"?authorName"/$authorName}
-rc_node_node_cpp=${rc_node_node_cpp//"?authorEmail"/$authorEmail}
-rc_node_node_cpp=${rc_node_node_cpp//"?brief"/$brief}
-echo $rc_node_node_cpp > $pkg_path/src/$rc_node"_node.cpp"
-'
+new_node_node_cpp="$(cat $templates_path/rc_node_node.cpp)"
+new_node_node_cpp=${new_node_node_cpp//"?rc_package"/$pkg_name}
+new_node_node_cpp=${new_node_node_cpp//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
+new_node_node_cpp=${new_node_node_cpp//"?RCNode"/$NewNode}
+new_node_node_cpp=${new_node_node_cpp//"?rc_node"/$new_node}
+new_node_node_cpp=${new_node_node_cpp//"?RC_NODE"/$NEW_NODE}
+new_node_node_cpp=${new_node_node_cpp//"rcomponent::RComponent"/$ParentNode}
+echo $new_node_node_cpp > $pkg_path/src/$new_node"_node.cpp"
