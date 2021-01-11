@@ -132,7 +132,7 @@ fi
 # CREATE PACKAGE
 
 pkg_path=$dest_path/$rc_package
-templates_path=`pwd roscd rcomponent`"/templates"
+templates_path=`rospack find rcomponent`"/templates"
 
 # Create directories
 mkdir -p $pkg_path/config
