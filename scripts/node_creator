@@ -137,7 +137,7 @@ templates_path=`rospack find rcomponent`"/templates"
 # Create directories
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/include/$rc_package
-mkdir $pkg_path/launch
+mkdir -p $pkg_path/launch
 mkdir -p $pkg_path/src/$rc_package
 
 # Create .yaml
@@ -152,7 +152,7 @@ rc_node_h=${rc_node_h//"?RC_NODE"/$RC_NODE}
 rc_node_h=${rc_node_h//"?authorName"/$authorName}
 rc_node_h=${rc_node_h//"?authorEmail"/$authorEmail}
 rc_node_h=${rc_node_h//"?brief"/$brief}
-echo $rc_node_h > $pkg_path/include/$rc_package/$rc_node.h
+echo -e $rc_node_h > $pkg_path/include/$rc_package/$rc_node.h
 
 # Create python .launch
 rc_node_py_launch="$(cat $templates_path/rc_node_py.launch)"
@@ -163,7 +163,7 @@ rc_node_py_launch=${rc_node_py_launch//"?RC_NODE"/$RC_NODE}
 rc_node_py_launch=${rc_node_py_launch//"?authorName"/$authorName}
 rc_node_py_launch=${rc_node_py_launch//"?authorEmail"/$authorEmail}
 rc_node_py_launch=${rc_node_py_launch//"?brief"/$brief}
-echo $rc_node_py_launch > $pkg_path/launch/$rc_node"_py.launch"
+echo -e $rc_node_py_launch > $pkg_path/launch/$rc_node"_py.launch"
 
 # Create C++ .launch
 rc_node_cpp_launch="$(cat $templates_path/rc_node_cpp.launch)"
@@ -174,7 +174,7 @@ rc_node_cpp_launch=${rc_node_cpp_launch//"?RC_NODE"/$RC_NODE}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?authorName"/$authorName}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?authorEmail"/$authorEmail}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?brief"/$brief}
-echo $rc_node_cpp_launch > $pkg_path/launch/$rc_node"_cpp.launch"
+echo -e $rc_node_cpp_launch > $pkg_path/launch/$rc_node"_cpp.launch"
 
 # Create python files
 touch $pkg_path/src/$rc_package/__init__.py
@@ -187,7 +187,7 @@ setup_py=${setup_py//"?RC_NODE"/$RC_NODE}
 setup_py=${setup_py//"?authorName"/$authorName}
 setup_py=${setup_py//"?authorEmail"/$authorEmail}
 setup_py=${setup_py//"?brief"/$brief}
-echo $setup_py > $pkg_path/setup.py
+echo -e $setup_py > $pkg_path/setup.py
 
 rc_node_py="$(cat $templates_path/rc_node.py)"
 rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
@@ -197,7 +197,7 @@ rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_py=${rc_node_py//"?authorName"/$authorName}
 rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
 rc_node_py=${rc_node_py//"?brief"/$brief}
-echo $rc_node_py > $pkg_path/src/$rc_package/$rc_node.py
+echo -e $rc_node_py > $pkg_path/src/$rc_package/$rc_node.py
 
 rc_node_node_py="$(cat $templates_path/rc_node_node.py)"
 rc_node_node_py=${rc_node_node_py//"?rc_package"/$rc_package}
@@ -207,7 +207,7 @@ rc_node_node_py=${rc_node_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_node_py=${rc_node_node_py//"?authorName"/$authorName}
 rc_node_node_py=${rc_node_node_py//"?authorEmail"/$authorEmail}
 rc_node_node_py=${rc_node_node_py//"?brief"/$brief}
-echo $rc_node_node_py > $pkg_path/src/$rc_package/$rc_node"_node.py"
+echo -e $rc_node_node_py > $pkg_path/src/$rc_package/$rc_node"_node.py"
 chmod +x $pkg_path/src/$rc_package/$rc_node"_node.py"
 
 # Create C++ src files
@@ -219,7 +219,7 @@ rc_node_cpp=${rc_node_cpp//"?RC_NODE"/$RC_NODE}
 rc_node_cpp=${rc_node_cpp//"?authorName"/$authorName}
 rc_node_cpp=${rc_node_cpp//"?authorEmail"/$authorEmail}
 rc_node_cpp=${rc_node_cpp//"?brief"/$brief}
-echo $rc_node_cpp > $pkg_path/src/$rc_node.cpp
+echo -e $rc_node_cpp > $pkg_path/src/$rc_node.cpp
 
 rc_node_node_cpp="$(cat $templates_path/rc_node_node.cpp)"
 rc_node_node_cpp=${rc_node_node_cpp//"?rc_package"/$rc_package}
@@ -229,7 +229,7 @@ rc_node_node_cpp=${rc_node_node_cpp//"?RC_NODE"/$RC_NODE}
 rc_node_node_cpp=${rc_node_node_cpp//"?authorName"/$authorName}
 rc_node_node_cpp=${rc_node_node_cpp//"?authorEmail"/$authorEmail}
 rc_node_node_cpp=${rc_node_node_cpp//"?brief"/$brief}
-echo $rc_node_node_cpp > $pkg_path/src/$rc_node"_node.cpp"
+echo -e $rc_node_node_cpp > $pkg_path/src/$rc_node"_node.cpp"
 
 # Changelog file
 changelog="$(cat $templates_path/CHANGELOG.rst)"
@@ -240,7 +240,7 @@ changelog=${changelog//"?RC_NODE"/$RC_NODE}
 changelog=${changelog//"?authorName"/$authorName}
 changelog=${changelog//"?authorEmail"/$authorEmail}
 changelog=${changelog//"?brief"/$brief}
-echo $changelog > $pkg_path/CHANGELOG.rst
+echo -e $changelog > $pkg_path/CHANGELOG.rst
 
 # CMakeLists file
 cmakelists="$(cat $templates_path/CMakeLists.txt)"
@@ -251,7 +251,7 @@ cmakelists=${cmakelists//"?RC_NODE"/$RC_NODE}
 cmakelists=${cmakelists//"?authorName"/$authorName}
 cmakelists=${cmakelists//"?authorEmail"/$authorEmail}
 cmakelists=${cmakelists//"?brief"/$brief}
-echo $cmakelists > $pkg_path/CMakeLists.txt
+echo -e $cmakelists > $pkg_path/CMakeLists.txt
 
 # package.xml file
 pkg_xml="$(cat $templates_path/package.xml)"
@@ -262,7 +262,7 @@ pkg_xml=${pkg_xml//"?RC_NODE"/$RC_NODE}
 pkg_xml=${pkg_xml//"?authorName"/$authorName}
 pkg_xml=${pkg_xml//"?authorEmail"/$authorEmail}
 pkg_xml=${pkg_xml//"?brief"/$brief}
-echo $pkg_xml > $pkg_path/package.xml
+echo -e $pkg_xml > $pkg_path/package.xml
 
 # Readme file
 readme="$(cat $templates_path/README.md)"
@@ -273,7 +273,7 @@ readme=${readme//"?RC_NODE"/$RC_NODE}
 readme=${readme//"?authorName"/$authorName}
 readme=${readme//"?authorEmail"/$authorEmail}
 readme=${readme//"?brief"/$brief}
-echo $readme > $pkg_path/README.md
+echo -e $readme > $pkg_path/README.md
 
 # Gitignore file
 cp $templates_path/.gitignore $pkg_path/.gitignore
