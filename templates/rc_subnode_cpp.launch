@@ -15,7 +15,7 @@
 	<arg name="example_subscriber_name" default="example" />
 
 	<!-- Load .yaml example -->
-	<rosparam file="$(find ?pkg_name)/config/example.yaml" command="load" />
+	<!--rosparam file="$(find ?pkg_name)/config/example.yaml" command="load" /-->
 
 	<!--group ns="$(arg id_robot)"-->
 

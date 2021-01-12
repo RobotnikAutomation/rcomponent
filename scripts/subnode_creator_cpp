@@ -18,8 +18,6 @@ red="\e[1;31m"
 white="\e[1;37m"
 yellow="\e[1;33m"
 
-IFS= # Necessary for copying line breaks on cat
-
 
 # IS USER REQUESTING FOR HELP?
 
@@ -49,6 +47,8 @@ clear
 echo -e "\n${bold}${yellow}Welcome to the subnode creator assistant."
 echo -e -n "\n${reset}The goal of this script is to simplify the creation of new "
 echo -e    "nodes that inherit from others on existing packages."
+echo -e -n "Make sure that the existing package has been initially created "
+echo -e    "with the RComponent 'node_creator' script for avoiding format errors."
 
 
 # LOAD PARAMETERS
@@ -149,7 +149,7 @@ new_node_h=${new_node_h//"?new_node"/$new_node}
 new_node_h=${new_node_h//"?NEW_NODE"/$NEW_NODE}
 new_node_h=${new_node_h//"?ParentNode"/$ParentNode}
 new_node_h=${new_node_h//"?parent_node"/$parent_node}
-echo $new_node_h > $pkg_path/include/$pkg_name/$new_node.h
+echo -e "$new_node_h" > $pkg_path/include/$pkg_name/$new_node.h
 
 # Create .launch
 new_node_launch="$(cat $templates_path/rc_subnode_cpp.launch)"
@@ -159,7 +159,7 @@ new_node_launch=${new_node_launch//"?new_node"/$new_node}
 new_node_launch=${new_node_launch//"?NEW_NODE"/$NEW_NODE}
 new_node_launch=${new_node_launch//"?ParentNode"/$ParentNode}
 new_node_launch=${new_node_launch//"?parent_node"/$parent_node}
-echo $new_node_launch > $pkg_path/launch/$new_node.launch
+echo -e "$new_node_launch" > $pkg_path/launch/$new_node.launch
 
 # Create C++ src files
 new_node_cpp="$(cat $templates_path/rc_subnode.cpp)"
@@ -169,7 +169,7 @@ new_node_cpp=${new_node_cpp//"?new_node"/$new_node}
 new_node_cpp=${new_node_cpp//"?NEW_NODE"/$NEW_NODE}
 new_node_cpp=${new_node_cpp//"?ParentNode"/$ParentNode}
 new_node_cpp=${new_node_cpp//"?parent_node"/$parent_node}
-echo $new_node_cpp > $pkg_path/src/$new_node.cpp
+echo -e "$new_node_cpp" > $pkg_path/src/$new_node.cpp
 
 new_node_node_cpp="$(cat $templates_path/rc_subnode_node.cpp)"
 new_node_node_cpp=${new_node_node_cpp//"?pkg_name"/$pkg_name}
@@ -178,4 +178,19 @@ new_node_node_cpp=${new_node_node_cpp//"?new_node"/$new_node}
 new_node_node_cpp=${new_node_node_cpp//"?NEW_NODE"/$NEW_NODE}
 new_node_node_cpp=${new_node_node_cpp//"?ParentNode"/$ParentNode}
 new_node_node_cpp=${new_node_node_cpp//"?parent_node"/$parent_node}
-echo $new_node_node_cpp > $pkg_path/src/$new_node"_node.cpp"
+echo -e "$new_node_node_cpp" > $pkg_path/src/$new_node"_node.cpp"
+
+# Create CMakeLists
+cmakelists_txt="$(cat $pkg_path/CMakeLists.txt)"
+cmakelists_txt=${cmakelists_txt//"add_library(\${PROJECT_NAME}"/"add_library(\${PROJECT_NAME}\n  src/$new_node.cpp"}
+cmakelists_txt=${cmakelists_txt//"src/$new_node.cpp
+  src/$new_node.cpp"/"src/$new_node.cpp"}
+cmakelists_txt=${cmakelists_txt/"add_executable("/"add_executable("$new_node"_node src/"$new_node"_node.cpp)\nadd_executable("}
+cmakelists_txt=${cmakelists_txt//"add_executable("$new_node"_node src/"$new_node"_node.cpp)\nadd_executable("$new_node"_node src/"$new_node"_node.cpp)"/"add_executable("$new_node"_node src/"$new_node"_node.cpp)"}
+cmakelists_txt=${cmakelists_txt//"add_dependencies(\${PROJECT_NAME} \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"/"add_dependencies(\${PROJECT_NAME} \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})\nadd_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"}
+cmakelists_txt=${cmakelists_txt//"add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})
+add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"/"add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"}
+cmakelists_txt=${cmakelists_txt/"target_link_libraries("/"target_link_libraries("$new_node"_node\n  \${catkin_LIBRARIES}\n  \${PROJECT_NAME}\n)\ntarget_link_libraries("}
+cmakelists_txt=${cmakelists_txt/"install(TARGETS \${PROJECT_NAME}"/"install(TARGETS \${PROJECT_NAME} "$new_node"_node"}
+cmakelists_txt=${cmakelists_txt/"install(TARGETS \${PROJECT_NAME} "$new_node"_node" $new_node"_node"/"install(TARGETS \${PROJECT_NAME} "$new_node"_node"}
+echo -e "$cmakelists_txt" > $pkg_path/CMakeLists.txt
