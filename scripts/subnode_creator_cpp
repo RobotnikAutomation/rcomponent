@@ -142,40 +142,40 @@ fi
 # CREATE FILES
 
 # Create .h
-new_node_h="$(cat $templates_path/rc_node.h)"
-new_node_h=${new_node_h//"?rc_package"/$pkg_name}
-new_node_h=${new_node_h//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
-new_node_h=${new_node_h//"?RCNode"/$NewNode}
-new_node_h=${new_node_h//"?rc_node"/$new_node}
-new_node_h=${new_node_h//"?RC_NODE"/$NEW_NODE}
-new_node_h=${new_node_h//"rcomponent::RComponent"/$ParentNode}
+new_node_h="$(cat $templates_path/rc_subnode.h)"
+new_node_h=${new_node_h//"?pkg_name"/$pkg_name}
+new_node_h=${new_node_h//"?NewNode"/$NewNode}
+new_node_h=${new_node_h//"?new_node"/$new_node}
+new_node_h=${new_node_h//"?NEW_NODE"/$NEW_NODE}
+new_node_h=${new_node_h//"?ParentNode"/$ParentNode}
+new_node_h=${new_node_h//"?parent_node"/$parent_node}
 echo $new_node_h > $pkg_path/include/$pkg_name/$new_node.h
 
 # Create .launch
-new_node_launch="$(cat $templates_path/rc_node_cpp.launch)"
-new_node_launch=${new_node_launch//"?rc_package"/$pkg_name}
-new_node_launch=${new_node_launch//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
-new_node_launch=${new_node_launch//"?RCNode"/$NewNode}
-new_node_launch=${new_node_launch//"?rc_node"/$new_node}
-new_node_launch=${new_node_launch//"?RC_NODE"/$NEW_NODE}
-new_node_launch=${new_node_launch//"rcomponent::RComponent"/$ParentNode}
+new_node_launch="$(cat $templates_path/rc_subnode_cpp.launch)"
+new_node_launch=${new_node_launch//"?pkg_name"/$pkg_name}
+new_node_launch=${new_node_launch//"?NewNode"/$NewNode}
+new_node_launch=${new_node_launch//"?new_node"/$new_node}
+new_node_launch=${new_node_launch//"?NEW_NODE"/$NEW_NODE}
+new_node_launch=${new_node_launch//"?ParentNode"/$ParentNode}
+new_node_launch=${new_node_launch//"?parent_node"/$parent_node}
 echo $new_node_launch > $pkg_path/launch/$new_node.launch
 
 # Create C++ src files
-new_node_cpp="$(cat $templates_path/rc_node.cpp)"
-new_node_cpp=${new_node_cpp//"?rc_package"/$pkg_name}
-new_node_cpp=${new_node_cpp//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
-new_node_cpp=${new_node_cpp//"?RCNode"/$NewNode}
-new_node_cpp=${new_node_cpp//"?rc_node"/$new_node}
-new_node_cpp=${new_node_cpp//"?RC_NODE"/$NEW_NODE}
-new_node_cpp=${new_node_cpp//"rcomponent::RComponent"/$ParentNode}
+new_node_cpp="$(cat $templates_path/rc_subnode.cpp)"
+new_node_cpp=${new_node_cpp//"?pkg_name"/$pkg_name}
+new_node_cpp=${new_node_cpp//"?NewNode"/$NewNode}
+new_node_cpp=${new_node_cpp//"?new_node"/$new_node}
+new_node_cpp=${new_node_cpp//"?NEW_NODE"/$NEW_NODE}
+new_node_cpp=${new_node_cpp//"?ParentNode"/$ParentNode}
+new_node_cpp=${new_node_cpp//"?parent_node"/$parent_node}
 echo $new_node_cpp > $pkg_path/src/$new_node.cpp
 
-new_node_node_cpp="$(cat $templates_path/rc_node_node.cpp)"
-new_node_node_cpp=${new_node_node_cpp//"?rc_package"/$pkg_name}
-new_node_node_cpp=${new_node_node_cpp//"<rcomponent/rcomponent.h>"/"<$pkg_name/$parent_node.h>"}
-new_node_node_cpp=${new_node_node_cpp//"?RCNode"/$NewNode}
-new_node_node_cpp=${new_node_node_cpp//"?rc_node"/$new_node}
-new_node_node_cpp=${new_node_node_cpp//"?RC_NODE"/$NEW_NODE}
-new_node_node_cpp=${new_node_node_cpp//"rcomponent::RComponent"/$ParentNode}
+new_node_node_cpp="$(cat $templates_path/rc_subnode_node.cpp)"
+new_node_node_cpp=${new_node_node_cpp//"?pkg_name"/$pkg_name}
+new_node_node_cpp=${new_node_node_cpp//"?NewNode"/$NewNode}
+new_node_node_cpp=${new_node_node_cpp//"?new_node"/$new_node}
+new_node_node_cpp=${new_node_node_cpp//"?NEW_NODE"/$NEW_NODE}
+new_node_node_cpp=${new_node_node_cpp//"?ParentNode"/$ParentNode}
+new_node_node_cpp=${new_node_node_cpp//"?parent_node"/$parent_node}
 echo $new_node_node_cpp > $pkg_path/src/$new_node"_node.cpp"
