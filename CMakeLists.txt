@@ -42,8 +42,6 @@ add_executable(rcomponent_server src/simple_service_component.cpp)
 add_executable(rcomponent_simple src/simple_component.cpp)
 add_executable(rcomponent_simple_async src/simple_component_async.cpp)
 add_executable(rcomponent_diagnostic src/simple_diagnostics_component.cpp)
-add_executable(rcomponent_template src/rcomponent_template.cpp)
-add_executable(rscomponent_template src/rscomponent_template.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -52,7 +50,6 @@ add_dependencies(rcomponent_server robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_simple robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_simple_async robotnik_msgs_generate_messages_cpp)
 add_dependencies(rcomponent_diagnostic robotnik_msgs_generate_messages_cpp)
-add_dependencies(rcomponent_template robotnik_msgs_generate_messages_cpp)
 
 
 target_link_libraries(rcomponent_server
@@ -69,13 +66,6 @@ target_link_libraries(rcomponent_simple_async
 )
 target_link_libraries(rcomponent_diagnostic
    rcomponent
-   ${catkin_LIBRARIES}
-)
-target_link_libraries(rcomponent_template
-   ${catkin_LIBRARIES}
-)
-
-target_link_libraries(rscomponent_template
    ${catkin_LIBRARIES}
 )
 
