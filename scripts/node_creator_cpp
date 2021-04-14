@@ -44,7 +44,7 @@ fi
 
 # Introduction to the script
 clear
-echo -e "\n${bold}${yellow}Welcome to the node creator assistant."
+echo -e "\n${bold}${yellow}Welcome to the C++ node creator assistant."
 echo -e -n "\n${reset}The goal of this script is to simplify the creation of new "
 echo -e    "rcomponent-based nodes."
 
@@ -111,13 +111,11 @@ else
     RC_NODE=${rc_node^^}
 
     # Load author name
-    echo -e -n "\n${reset}Author name (e.g. "
-    echo -e    "${italic}José Gómez${reset}): "
+    echo -e -n "\n${reset}Author name: "
     read authorName
 
     # Load author email
-    echo -e -n "\n${reset}Author email (e.g. "
-    echo -e    "${italic}jgomez@robotnik.es${reset}): "
+    echo -e -n "\n${reset}Author email: "
     read authorEmail
 
     # Load node description
@@ -136,7 +134,7 @@ templates_path=`rospack find rcomponent`"/templates"
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/include/$rc_package
 mkdir -p $pkg_path/launch
-mkdir -p $pkg_path/src/$rc_package
+mkdir -p $pkg_path/src
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"
@@ -152,17 +150,6 @@ rc_node_h=${rc_node_h//"?authorEmail"/$authorEmail}
 rc_node_h=${rc_node_h//"?brief"/$brief}
 echo -e "$rc_node_h" > $pkg_path/include/$rc_package/$rc_node.h
 
-# Create python .launch
-rc_node_py_launch="$(cat $templates_path/rc_node_py.launch)"
-rc_node_py_launch=${rc_node_py_launch//"?rc_package"/$rc_package}
-rc_node_py_launch=${rc_node_py_launch//"?RCNode"/$RCNode}
-rc_node_py_launch=${rc_node_py_launch//"?rc_node"/$rc_node}
-rc_node_py_launch=${rc_node_py_launch//"?RC_NODE"/$RC_NODE}
-rc_node_py_launch=${rc_node_py_launch//"?authorName"/$authorName}
-rc_node_py_launch=${rc_node_py_launch//"?authorEmail"/$authorEmail}
-rc_node_py_launch=${rc_node_py_launch//"?brief"/$brief}
-echo -e "$rc_node_py_launch" > $pkg_path/launch/$rc_node"_py.launch"
-
 # Create C++ .launch
 rc_node_cpp_launch="$(cat $templates_path/rc_node_cpp.launch)"
 rc_node_cpp_launch=${rc_node_cpp_launch//"?rc_package"/$rc_package}
@@ -172,41 +159,7 @@ rc_node_cpp_launch=${rc_node_cpp_launch//"?RC_NODE"/$RC_NODE}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?authorName"/$authorName}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?authorEmail"/$authorEmail}
 rc_node_cpp_launch=${rc_node_cpp_launch//"?brief"/$brief}
-echo -e "$rc_node_cpp_launch" > $pkg_path/launch/$rc_node"_cpp.launch"
-
-# Create python files
-touch $pkg_path/src/$rc_package/__init__.py
-
-setup_py="$(cat $templates_path/setup.py)"
-setup_py=${setup_py//"?rc_package"/$rc_package}
-setup_py=${setup_py//"?RCNode"/$RCNode}
-setup_py=${setup_py//"?rc_node"/$rc_node}
-setup_py=${setup_py//"?RC_NODE"/$RC_NODE}
-setup_py=${setup_py//"?authorName"/$authorName}
-setup_py=${setup_py//"?authorEmail"/$authorEmail}
-setup_py=${setup_py//"?brief"/$brief}
-echo -e "$setup_py" > $pkg_path/setup.py
-
-rc_node_py="$(cat $templates_path/rc_node.py)"
-rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
-rc_node_py=${rc_node_py//"?RCNode"/$RCNode}
-rc_node_py=${rc_node_py//"?rc_node"/$rc_node}
-rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
-rc_node_py=${rc_node_py//"?authorName"/$authorName}
-rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
-rc_node_py=${rc_node_py//"?brief"/$brief}
-echo -e "$rc_node_py" > $pkg_path/src/$rc_package/$rc_node.py
-
-rc_node_node_py="$(cat $templates_path/rc_node_node.py)"
-rc_node_node_py=${rc_node_node_py//"?rc_package"/$rc_package}
-rc_node_node_py=${rc_node_node_py//"?RCNode"/$RCNode}
-rc_node_node_py=${rc_node_node_py//"?rc_node"/$rc_node}
-rc_node_node_py=${rc_node_node_py//"?RC_NODE"/$RC_NODE}
-rc_node_node_py=${rc_node_node_py//"?authorName"/$authorName}
-rc_node_node_py=${rc_node_node_py//"?authorEmail"/$authorEmail}
-rc_node_node_py=${rc_node_node_py//"?brief"/$brief}
-echo -e "$rc_node_node_py" > $pkg_path/src/$rc_package/$rc_node"_node.py"
-chmod +x $pkg_path/src/$rc_package/$rc_node"_node.py"
+echo -e "$rc_node_cpp_launch" > $pkg_path/launch/$rc_node".launch"
 
 # Create C++ src files
 rc_node_cpp="$(cat $templates_path/rc_node.cpp)"
@@ -241,7 +194,7 @@ changelog=${changelog//"?brief"/$brief}
 echo -e "$changelog" > $pkg_path/CHANGELOG.rst
 
 # CMakeLists file
-cmakelists="$(cat $templates_path/CMakeLists.txt)"
+cmakelists="$(cat $templates_path/CMakeLists_cpp.txt)"
 cmakelists=${cmakelists//"?rc_package"/$rc_package}
 cmakelists=${cmakelists//"?RCNode"/$RCNode}
 cmakelists=${cmakelists//"?rc_node"/$rc_node}
@@ -252,7 +205,7 @@ cmakelists=${cmakelists//"?brief"/$brief}
 echo -e "$cmakelists" > $pkg_path/CMakeLists.txt
 
 # package.xml file
-pkg_xml="$(cat $templates_path/package.xml)"
+pkg_xml="$(cat $templates_path/package_cpp.xml)"
 pkg_xml=${pkg_xml//"?rc_package"/$rc_package}
 pkg_xml=${pkg_xml//"?RCNode"/$RCNode}
 pkg_xml=${pkg_xml//"?rc_node"/$rc_node}
