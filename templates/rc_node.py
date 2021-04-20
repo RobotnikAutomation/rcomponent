@@ -34,14 +34,18 @@ class ?RCNode(RComponent):
 
         RComponent.ros_setup(self)
 
-        self.example_sub = rospy.Subscriber(
-            self.example_subscriber_name, String, self.example_sub_cb)
-
+        # Publisher
         self.data_pub = rospy.Publisher(
             '~data', String, queue_size=10)
         self.data_stamped_pub = rospy.Publisher(
             '~data_stamped', StringStamped, queue_size=10)
 
+        # Subscriber
+        self.example_sub = rospy.Subscriber(
+            self.example_subscriber_name, String, self.example_sub_cb)
+        RComponent.add_topics_health(self, self.example_sub, topic_id='example_sub', timeout=1.0, required=False)
+
+        # Service
         self.example_server = rospy.Service(
             '~example', Trigger, self.example_server_cb)
 
@@ -55,6 +59,12 @@ class ?RCNode(RComponent):
     def ready_state(self):
         """Actions performed in ready state"""
 
+        # Check topic health
+
+        if(self.check_topics_health() == False):
+            self.switch_to_state(State.EMERGENCY_STATE)
+            return RComponent.ready_state(self)
+
         # Publish topic with data
 
         data_stamped = StringStamped()
@@ -65,6 +75,10 @@ class ?RCNode(RComponent):
         self.data_stamped_pub.publish(data_stamped)
 
         return RComponent.ready_state(self)
+
+    def emergency_state(self):
+        if(self.check_topics_health() == True):
+            self.switch_to_state(State.READY_STATE)
 
     def shutdown(self):
         """Shutdowns device
@@ -83,6 +97,7 @@ class ?RCNode(RComponent):
 
     def example_sub_cb(self, msg):
         rospy.logwarn("Received msg: " + msg.data)
+        self.tick_topics_health('example_sub')
 
     def example_server_cb(self, req):
         rospy.logwarn("Received srv trigger petition.")
