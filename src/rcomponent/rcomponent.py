@@ -37,7 +37,10 @@ import rospy
 import time
 import threading
 
-from topic_health_monitor import TopicHealthMonitor
+try:
+    from topic_health_monitor import TopicHealthMonitor
+except ImportError:
+    from rcomponent.topic_health_monitor import TopicHealthMonitor
 
 from robotnik_msgs.msg import State
 
@@ -83,7 +86,7 @@ class RComponent:
 
         try:
             self._desired_freq = rospy.get_param('~desired_freq', default=DEFAULT_FREQ)
-        except rospy.ROSException, e:
+        except rospy.ROSException as e:
             rospy.logerr('%s' % (e))
             exit(-1)
 
@@ -535,7 +538,7 @@ def main():
 			else:
 				args[name] = arg_defaults[name]
 			#print name
-		except rospy.ROSException, e:
+		except rospy.ROSException as e:
 			rospy.logerr('%s: %s'%(e, _name))
 
 
