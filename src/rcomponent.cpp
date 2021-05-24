@@ -197,6 +197,7 @@ int RComponent::start()
 
   running = true;
 
+  switchToState(robotnik_msgs::State::INIT_STATE);
   // Executes the control loop
   controlLoop();
 
@@ -231,6 +232,7 @@ int RComponent::asyncStart()
 
   running = true;
 
+  switchToState(robotnik_msgs::State::INIT_STATE);
   if (pthread_create(&threadData.pthreadId, &attr, &RComponent::asyncControlLoop, this) != 0)
   {
     RCOMPONENT_ERROR("Could not create ControlThread");
