@@ -35,10 +35,10 @@ class ?RCNode(RComponent):
         RComponent.ros_setup(self)
 
         # Publisher
-        self.data_pub = rospy.Publisher(
-            '~data', String, queue_size=10)
-        self.data_stamped_pub = rospy.Publisher(
-            '~data_stamped', StringStamped, queue_size=10)
+        self.status_pub = rospy.Publisher(
+            '~status', String, queue_size=10)
+        self.status_stamped_pub = rospy.Publisher(
+            '~status_stamped', StringStamped, queue_size=10)
 
         # Subscriber
         self.example_sub = rospy.Subscriber(
@@ -52,7 +52,7 @@ class ?RCNode(RComponent):
         return 0
 
     def init_state(self):
-        self.data = String()
+        self.status = String()
 
         return RComponent.init_state(self)
 
@@ -65,14 +65,14 @@ class ?RCNode(RComponent):
             self.switch_to_state(State.EMERGENCY_STATE)
             return RComponent.ready_state(self)
 
-        # Publish topic with data
+        # Publish topic with status
 
-        data_stamped = StringStamped()
-        data_stamped.header.stamp = rospy.Time.now()
-        data_stamped.string = self.data.data
+        status_stamped = StringStamped()
+        status_stamped.header.stamp = rospy.Time.now()
+        status_stamped.string = self.status.data
 
-        self.data_pub.publish(self.data)
-        self.data_stamped_pub.publish(data_stamped)
+        self.status_pub.publish(self.status)
+        self.status_stamped_pub.publish(status_stamped)
 
         return RComponent.ready_state(self)
 

@@ -27,8 +27,8 @@ int ?RCNode::rosSetup()
   bool not_required = false;
 
   // Publisher
-  data_pub_ = pnh_.advertise<std_msgs::String>("data", 10);
-  data_stamped_pub_ = pnh_.advertise<robotnik_msgs::StringStamped>("data_stamped", 10);
+  status_pub_ = pnh_.advertise<std_msgs::String>("status", 10);
+  status_stamped_pub_ = pnh_.advertise<robotnik_msgs::StringStamped>("status_stamped", 10);
 
   // Subscriber
   example_sub_ = nh_.subscribe<std_msgs::String>(example_subscriber_name_, 10, &?RCNode::exampleSubCb, this);
@@ -49,13 +49,13 @@ void ?RCNode::rosPublish()
 
   if (getState() == robotnik_msgs::State::READY_STATE)
   {
-    robotnik_msgs::StringStamped data_stamped;
+    robotnik_msgs::StringStamped status_stamped;
 
-    data_pub_.publish(data_);
+    status_pub_.publish(status_);
 
-    data_stamped.header.stamp = ros::Time::now();
-    data_stamped.string = data_.data;
-    data_stamped_pub_.publish(data_stamped);
+    status_stamped.header.stamp = ros::Time::now();
+    status_stamped.string = status_.data;
+    status_stamped_pub_.publish(status_stamped);
   }
 }
 

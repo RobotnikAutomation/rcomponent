@@ -47,8 +47,8 @@ protected:
   // Publishers
 
   //! To publish the basic information
-  ros::Publisher data_pub_;
-  ros::Publisher data_stamped_pub_;
+  ros::Publisher status_pub_;
+  ros::Publisher status_stamped_pub_;
 
   //! Subscribers
   ros::Subscriber example_sub_;
@@ -66,7 +66,7 @@ protected:
 
   /* ?RCNode stuff */
 
-  std_msgs::String data_;
+  std_msgs::String status_;
 
   /* ?RCNode stuff !*/
 
