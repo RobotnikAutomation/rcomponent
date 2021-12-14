@@ -15,8 +15,8 @@ TEST(TestProcedureComponent, shouldGetProperNamespaces)
   ROS_ERROR("pako");
   ROS_ERROR_NAMED("pepe", "manolo");
 
-  EXPECT_EQ("/rosunit_procedure_component", component.getPublicNamespace());
-  EXPECT_EQ("/rosunit_procedure_component/private", component.getPrivateNamespace());
+  EXPECT_EQ("/rosunit_rcomponent", component.getPublicNamespace());
+  EXPECT_EQ("/rosunit_rcomponent/private", component.getPrivateNamespace());
 
   FAIL();
 }
