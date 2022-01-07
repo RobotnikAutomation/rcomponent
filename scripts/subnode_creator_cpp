@@ -182,15 +182,14 @@ echo -e "$new_node_node_cpp" > $pkg_path/src/$new_node"_node.cpp"
 
 # Create CMakeLists
 cmakelists_txt="$(cat $pkg_path/CMakeLists.txt)"
-cmakelists_txt=${cmakelists_txt//"add_library(\${PROJECT_NAME}"/"add_library(\${PROJECT_NAME}\n  src/$new_node.cpp"}
-cmakelists_txt=${cmakelists_txt//"src/$new_node.cpp
-  src/$new_node.cpp"/"src/$new_node.cpp"}
+cmakelists_txt=${cmakelists_txt//"add_library(\${PROJECT_NAME}"/"add_library(\${PROJECT_NAME} src/$new_node.cpp"}
+cmakelists_txt=${cmakelists_txt//"src/$new_node.cpp src/$new_node.cpp"/"src/$new_node.cpp"}
 cmakelists_txt=${cmakelists_txt/"add_executable("/"add_executable("$new_node"_node src/"$new_node"_node.cpp)\nadd_executable("}
 cmakelists_txt=${cmakelists_txt//"add_executable("$new_node"_node src/"$new_node"_node.cpp)\nadd_executable("$new_node"_node src/"$new_node"_node.cpp)"/"add_executable("$new_node"_node src/"$new_node"_node.cpp)"}
-cmakelists_txt=${cmakelists_txt//"add_dependencies(\${PROJECT_NAME} \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"/"add_dependencies(\${PROJECT_NAME} \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})\nadd_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"}
+cmakelists_txt=${cmakelists_txt//"add_executable("$new_node"_node src/"$new_node"_node.cpp)"/"add_executable("$new_node"_node src/"$new_node"_node.cpp)\nadd_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"}
 cmakelists_txt=${cmakelists_txt//"add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})
 add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"/"add_dependencies("$new_node"_node \${\${PROJECT_NAME}_EXPORTED_TARGETS} \${catkin_EXPORTED_TARGETS})"}
-cmakelists_txt=${cmakelists_txt/"target_link_libraries("/"target_link_libraries("$new_node"_node\n  \${catkin_LIBRARIES}\n  \${PROJECT_NAME}\n)\ntarget_link_libraries("}
+cmakelists_txt=${cmakelists_txt/"## Specify libraries to link a executable target against"/"## Specify libraries to link a executable target against\ntarget_link_libraries("$new_node"_node\n  \${catkin_LIBRARIES}\n  \${PROJECT_NAME}\n)"}
 cmakelists_txt=${cmakelists_txt/"install(TARGETS \${PROJECT_NAME}"/"install(TARGETS \${PROJECT_NAME} "$new_node"_node"}
 cmakelists_txt=${cmakelists_txt/"install(TARGETS \${PROJECT_NAME} "$new_node"_node" $new_node"_node"/"install(TARGETS \${PROJECT_NAME} "$new_node"_node"}
 echo -e "$cmakelists_txt" > $pkg_path/CMakeLists.txt
