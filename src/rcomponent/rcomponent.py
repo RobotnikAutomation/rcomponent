@@ -471,8 +471,8 @@ class RComponent:
             @return true if health is ok, false otherwise
         '''
         if len(self._data_health_monitors) == 0:
-            rospy.logerr('%s::check_topics_health: no topics to check!', self._node_name)
-            return False
+            rospy.logwarn('%s::check_topics_health: no topics to check!', self._node_name)
+            return True
 
         if topic_id != '':
             if topic_id not in self._data_health_monitors:
