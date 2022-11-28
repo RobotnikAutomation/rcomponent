@@ -42,6 +42,8 @@ try:
 except ImportError:
     from rcomponent.topic_health_monitor import TopicHealthMonitor
 
+from log_client import LogClient
+
 from robotnik_msgs.msg import State
 
 DEFAULT_FREQ = 10.0
@@ -95,6 +97,10 @@ class RComponent:
             rospy.loginfo('%s::init: Desired freq to %f is not possible. Setting _desired_freq to %f' %
                           (self._node_name, self._desired_freq, DEFAULT_FREQ))
             self._desired_freq = DEFAULT_FREQ
+        
+        self._log_ns = 'logger/insert'
+        self._log_ns = rospy.get_param('~log_ns', default=self._log_ns)
+
 
     def setup(self):
         '''
@@ -123,6 +129,7 @@ class RComponent:
         # self.service_client = rospy.ServiceProxy('service_name', ServiceMsg)
         # ret = self.service_client.call(ServiceMsg)
 
+        self._log_client = LogClient(self._node_name, self._log_ns)
         self._ros_initialized = True
 
         self.publish_ros_state()
