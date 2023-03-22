@@ -53,7 +53,8 @@ class ?RCNode(RComponent):
 
     def init_state(self):
         self.status = String()
-
+        
+        super().setup()
         return super().init_state()
 
     def ready_state(self):
