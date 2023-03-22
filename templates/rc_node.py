@@ -20,11 +20,11 @@ class ?RCNode(RComponent):
 
     def __init__(self):
 
-        RComponent.__init__(self)
+        super().__init__()
 
     def ros_read_params(self):
         """Gets params from param server"""
-        RComponent.ros_read_params(self)
+        super().ros_read_params()
 
         self.example_subscriber_name = rospy.get_param(
             '~example_subscriber_name', 'example')
@@ -32,7 +32,7 @@ class ?RCNode(RComponent):
     def ros_setup(self):
         """Creates and inits ROS components"""
 
-        RComponent.ros_setup(self)
+        super().ros_setup()
 
         # Publisher
         self.status_pub = rospy.Publisher(
@@ -43,7 +43,7 @@ class ?RCNode(RComponent):
         # Subscriber
         self.example_sub = rospy.Subscriber(
             self.example_subscriber_name, String, self.example_sub_cb)
-        RComponent.add_topics_health(self, self.example_sub, topic_id='example_sub', timeout=1.0, required=False)
+        super().add_topics_health(self.example_sub, topic_id='example_sub', timeout=1.0, required=False)
 
         # Service
         self.example_server = rospy.Service(
@@ -54,7 +54,7 @@ class ?RCNode(RComponent):
     def init_state(self):
         self.status = String()
 
-        return RComponent.init_state(self)
+        return super().init_state()
 
     def ready_state(self):
         """Actions performed in ready state"""
@@ -63,7 +63,7 @@ class ?RCNode(RComponent):
 
         if(self.check_topics_health() == False):
             self.switch_to_state(State.EMERGENCY_STATE)
-            return RComponent.ready_state(self)
+            return super().ready_state()
 
         # Publish topic with status
 
@@ -74,7 +74,7 @@ class ?RCNode(RComponent):
         self.status_pub.publish(self.status)
         self.status_stamped_pub.publish(status_stamped)
 
-        return RComponent.ready_state(self)
+        return super().ready_state()
 
     def emergency_state(self):
         if(self.check_topics_health() == True):
@@ -88,12 +88,12 @@ class ?RCNode(RComponent):
             -1: if there's any problem or the component is running
         """
 
-        return RComponent.shutdown(self)
+        return super().shutdown()
 
     def switch_to_state(self, new_state):
         """Performs the change of state"""
 
-        return RComponent.switch_to_state(self, new_state)
+        return super().switch_to_state(new_state)
 
     def example_sub_cb(self, msg):
         rospy.logwarn("Received msg: " + msg.data)
