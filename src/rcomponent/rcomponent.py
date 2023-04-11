@@ -42,7 +42,10 @@ try:
 except ImportError:
     from rcomponent.topic_health_monitor import TopicHealthMonitor
 
-from log_client import LogClient
+try:
+    from log_client import LogClient
+except ImportError:
+    from rcomponent.log_client import LogClient
 
 from robotnik_msgs.msg import State
 
