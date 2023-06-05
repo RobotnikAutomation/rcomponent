@@ -34,6 +34,7 @@
 #include <robotnik_msgs/State.h>
 
 #include <rcomponent/rcomponent_log_macros.h>
+#include <rcomponent/topic_health_monitor.h>
 #include <sstream>
 
 //! Size of string for logging
@@ -107,6 +108,12 @@ protected:
   //! Contains data for the main thread
   thread_data threadData;
 
+  //! Contains all the data health monitors
+  std::map<std::string, TopicHealthMonitor> data_health_monitors_;
+
+  //! Saves the time of a state transition
+  ros::Time t_state_transition_;
+
 public:
   //! Public constructor
   RComponent();
@@ -166,6 +173,17 @@ public:
   const std::string getPublicNamespace();
   //! Returns the private namespace of the component
   const std::string getPrivateNamespace();
+  //! Returns true if the topics healht is
+  virtual bool checkTopicsHealth(std::string topic_id = "");
+  //! Adds a topic health for the subscriber
+  virtual int addTopicsHealth(ros::Subscriber* subscriber = 0, std::string topic_id = "", double timeout = 5.0,
+                              bool required = true);
+  //! Ticks the selected topic
+  virtual int tickTopicsHealth(std::string topic_id);
+  //! Returns the elapsed time since the last state transition
+  ros::Duration getElapsedTimeSinceLastStateTransition();
+  //! Returns the state transition time
+  ros::Time getStateTransitionTime();
 
 protected:
   //! Configures and initializes the component
@@ -200,6 +218,19 @@ protected:
   virtual void allState();
   //! Switches between states
   virtual void switchToState(int new_state);
+  //! callback executed when moving to init state
+  virtual void switchToInitState();
+  //! callback executed when moving to standby state
+  virtual void switchToStandbyState();
+  //! callback executed when moving to ready state
+  virtual void switchToReadyState();
+  //! callback executed when moving to emergency state
+  virtual void switchToEmergencyState();
+  //! callback executed when moving to failure state
+  virtual void switchToFailureState();
+  //! callback executed when moving to shutdown state
+  virtual void switchToShutdownState();
+
   //! Setups all the ROS' stuff
   virtual int rosSetup();
   //! Shutdowns all the ROS' stuff
@@ -239,6 +270,15 @@ protected:
     return true;
   }
 
+  // Double template type, used when type of default value does not match type or variable, but can be casted safely.
+  // Example: T is double, S is in, or T is std::string, S is "char *"
+  template <typename T, typename S>
+  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, const S& default_value,
+                 bool required = false)
+  {
+    return readParam(h, name, value, static_cast<T>(default_value), required);
+  }
+
   template <typename T>
   bool readParam(const ros::NodeHandle& h, const std::string& name, std::vector<T>& value,
                  const std::vector<T>& default_value, bool required = false)
@@ -271,13 +311,6 @@ protected:
     h.param<std::vector<T>>(name, value, default_value);
     return true;
   }
-  // this version, where default value is grabbed from the value of the variable, causes an ambiguous template
-  // substution when paramter type is bool
-  //  template <typename T>
-  //  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, bool required = false)
-  //  {
-  //    return readParam(h, name, value, value, required);
-  //  }
 };
 }  // namespace rcomponent
 

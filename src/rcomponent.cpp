@@ -94,6 +94,8 @@ int RComponent::init(ros::NodeHandle h, ros::NodeHandle ph)
   threadData.pthreadPar.clock = CLOCK_REALTIME;  // 0-CLOCK_MONOTONIC 1-CLOCK_REALTIME
   constructed = true;
 
+  t_state_transition_ = ros::Time::now();
+
   return OK;
 }
 
@@ -195,6 +197,7 @@ int RComponent::start()
 
   running = true;
 
+  switchToState(robotnik_msgs::State::INIT_STATE);
   // Executes the control loop
   controlLoop();
 
@@ -226,6 +229,10 @@ int RComponent::asyncStart()
   RCOMPONENT_DEBUG("Launching the thread");
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+  running = true;
+
+  switchToState(robotnik_msgs::State::INIT_STATE);
   if (pthread_create(&threadData.pthreadId, &attr, &RComponent::asyncControlLoop, this) != 0)
   {
     RCOMPONENT_ERROR("Could not create ControlThread");
@@ -233,8 +240,6 @@ int RComponent::asyncStart()
     running = false;
     return ERROR;
   }
-
-  running = true;
 
   return OK;
 }
@@ -327,10 +332,13 @@ void RComponent::controlLoop()
     r.sleep();
 
     t2 = ros::Time::now();
-    try{
+    try
+    {
       real_freq = 1.0 / (t2 - t1).toSec();
-    }catch(std::runtime_error& ex) {
-        RCOMPONENT_ERROR("Exception: [%s]", ex.what());
+    }
+    catch (std::runtime_error& ex)
+    {
+      RCOMPONENT_ERROR("Exception: [%s]", ex.what());
     }
   }
 
@@ -534,6 +542,72 @@ void RComponent::switchToState(int new_state)
   previous_state = state;
   RCOMPONENT_INFO("%s -> %s", getStateString(state), getStateString(new_state));
   state = new_state;
+
+  switch (state)
+  {
+    case robotnik_msgs::State::INIT_STATE:
+      switchToInitState();
+      break;
+    case robotnik_msgs::State::STANDBY_STATE:
+      switchToStandbyState();
+      break;
+    case robotnik_msgs::State::READY_STATE:
+      switchToReadyState();
+      break;
+    case robotnik_msgs::State::EMERGENCY_STATE:
+      switchToEmergencyState();
+      break;
+    case robotnik_msgs::State::FAILURE_STATE:
+      switchToFailureState();
+      break;
+    case robotnik_msgs::State::SHUTDOWN_STATE:
+      switchToShutdownState();
+      break;
+  }
+
+  t_state_transition_ = ros::Time::now();
+}
+
+/*!	\fn void RComponent::switchToInitState()
+ * 	callback executed when moving to init state
+*/
+void RComponent::switchToInitState()
+{
+}
+
+/*!	\fn void RComponent::switchToStandbyState()
+ * 	callback executed when moving to standby state
+*/
+void RComponent::switchToStandbyState()
+{
+}
+
+/*!	\fn void RComponent::switchToReadyState()
+ * 	callback executed when moving to ready state
+*/
+void RComponent::switchToReadyState()
+{
+}
+
+/*!	\fn void RComponent::switchToEmergencyState()
+ * 	callback executed when moving to emergency state
+*/
+void RComponent::switchToEmergencyState()
+{
+}
+
+/*!	\fn void RComponent::switchToFailureState()
+ * 	callback executed when moving to failure state
+*/
+void RComponent::switchToFailureState()
+{
+}
+
+/*!	\fn void RComponent::switchToShutdownState()
+ * 	callback executed when moving to shutdown state
+*/
+void RComponent::switchToShutdownState()
+{
 }
 
 /*!	\fn void RComponent::rosSetup()
@@ -614,6 +688,128 @@ void RComponent::rosPublish()
   msg.state_description = getStateString();
 
   state_publisher.publish(msg);
+}
+
+/*!	\fn bool RComponent::checkTopicsHealth(std::string topic)
+ * 	\brief Checks the topic health of all the subscribed topics or specific ones
+ *  \param topic as std::string, topic to check. If empty all the topics are checked as a group
+ *  \return true if health is ok, false otherwise
+*/
+bool RComponent::checkTopicsHealth(std::string topic_id)
+{
+  std::map<std::string, TopicHealthMonitor>::iterator it;
+
+  if (data_health_monitors_.empty())
+  {
+    RCOMPONENT_WARN_STREAM_ONCE("Topics health monitor is empty");
+    return true;
+  }
+
+  if (topic_id.empty() == false)
+  {
+    it = data_health_monitors_.find(topic_id);
+
+    if (it != data_health_monitors_.end())
+    {
+      return it->second.isReceiving();
+    }
+    else
+    {
+      RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topic " << it->first << " not being received");
+      return false;
+    }
+  }
+  else  // Only check required topics
+  {
+    for (it = data_health_monitors_.begin(); it != data_health_monitors_.end(); ++it)
+    {
+      if (it->second.isReceiving() == false && it->second.isRequired() == true)
+      {
+        RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topic " << it->first << " not being received");
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+/*!	\fn int RComponent::addTopicsHealth(ros::Subscriber *subscriber = 0, std::string topic_id, double timeout)
+ * 	\brief Adds a topic health for the subscriber
+ *  \param subscriber as ros::Subscriber*, pointer to the Subscriber to check health
+ *  \param topic_id as std::string, topic id to associate with the subscriber. If empty it will use the full topic name
+ *  \param timeout as std::string, topic id to associate with the subscriber. If empty it will use the full topic name
+ *  \return 0 if ok, -1 otherwise
+*/
+int RComponent::addTopicsHealth(ros::Subscriber* subscriber, std::string topic_id, double timeout, bool required)
+{
+  std::string map_id;
+  if (subscriber == NULL)
+  {
+    RCOMPONENT_ERROR("Subscriber to check is NULL");
+    return -1;
+  }
+
+  if (topic_id.empty() == true)
+  {
+    map_id = subscriber->getTopic();
+  }
+  else
+  {
+    map_id = topic_id;
+  }
+  if (timeout <= 0)
+  {
+    RCOMPONENT_ERROR("timeout (%.lf) has to be >= 0", timeout);
+    timeout = 1.0;
+  }
+
+  data_health_monitors_[map_id] = TopicHealthMonitor(subscriber, timeout, required);
+
+  return 0;
+}
+
+/*!	\fn int RComponent::tickTopicsHealth(std::string topic_id)
+ * 	\brief Ticks the selected topic to notify that is being received
+ *  \param topic_id as std::string, topic id that identifies the subscriber
+ *  \return 0 if ok, -1 otherwise
+*/
+int RComponent::tickTopicsHealth(std::string topic_id)
+{
+  if (topic_id.empty() == true)
+  {
+    RCOMPONENT_ERROR_STREAM_THROTTLE(5, "topic id " << topic_id << " cannot be empty");
+    return -1;
+  }
+
+  std::map<std::string, TopicHealthMonitor>::iterator it;
+
+  it = data_health_monitors_.find(topic_id);
+
+  if (it != data_health_monitors_.end())
+  {
+    it->second.tick();
+    return 0;
+  }
+
+  RCOMPONENT_ERROR_STREAM_THROTTLE(5, "topic id " << topic_id << " does not exist");
+  return -1;
+}
+
+/*!	\fn ros::Duration RComponent::getElapsedTimeSinceLastStateTransition()
+ * 	\brief Returns the elapsed time since the last state transition
+*/
+ros::Duration RComponent::getElapsedTimeSinceLastStateTransition()
+{
+  return ros::Time::now() - t_state_transition_;
+}
+
+/*!	\fn ros::Time RComponent::getElapsedTimeSinceLastStateTransition()
+ * 	\brief Returns the state transition time
+*/
+ros::Time RComponent::getStateTransitionTime()
+{
+  return t_state_transition_;
 }
 
 }  // namespace rcomponent
