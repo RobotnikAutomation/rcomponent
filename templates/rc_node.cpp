@@ -36,11 +36,13 @@ int ?RCNode::rosSetup()
 
   // Service
   example_server_ = pnh_.advertiseService("example", &?RCNode::exampleServerCb, this);
+
+  return rcomponent::OK;
 }
 
 int ?RCNode::rosShutdown()
 {
-  RComponent::rosShutdown();
+  return RComponent::rosShutdown();
 }
 
 void ?RCNode::rosPublish()
