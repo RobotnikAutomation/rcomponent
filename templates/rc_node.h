@@ -16,29 +16,29 @@ class ?RCNode : public rcomponent::RComponent
 {
 public:
   ?RCNode(ros::NodeHandle h);
-  virtual ~?RCNode();
+  ~?RCNode() override;
 
 protected:
   /*** RComponent stuff ***/
 
   //! Setups all the ROS' stuff
-  virtual int rosSetup();
+  int rosSetup() override;
   //! Shutdowns all the ROS' stuff
-  virtual int rosShutdown();
+  int rosShutdown() override;
   //! Reads data a publish several info into different topics
-  virtual void rosPublish();
+  void rosPublish() override;
   //! Reads params from params server
-  virtual void rosReadParams();
+  void rosReadParams() override;
   //! Actions performed on init state
-  virtual void initState();
+  void initState() override;
   //! Actions performed on standby state
-  virtual void standbyState();
+  void standbyState() override;
   //! Actions performed on ready state
-  virtual void readyState();
+  void readyState() override;
   //! Actions performed on the emergency state
-  virtual void emergencyState();
+  void emergencyState() override;
   //! Actions performed on Failure state
-  virtual void failureState();
+  void failureState() override;
 
   /* RComponent stuff !*/
 
