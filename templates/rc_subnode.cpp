@@ -32,12 +32,14 @@ int ?NewNode::rosSetup()
   // Subscribers ...
 
   // Services ...
+
+  return rcomponent::OK;
   
 }
 
 int ?NewNode::rosShutdown()
 {
-  ?ParentNode::rosShutdown();
+  return ?ParentNode::rosShutdown();
 
   // Shutsown state...
 }
