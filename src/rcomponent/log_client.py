@@ -38,52 +38,195 @@ from rospy.service import ServiceException
 from robotnik_msgs.msg import Logger
 from robotnik_msgs.srv import LoggerQuery, LoggerQueryRequest
 
+from datetime import datetime
+import threading
+import inspect
+import os
+
+
+LOGLEVEL_COLOR_MAPPING = {'DEBUG': '\033[92m',
+                          'INFO': '\033[32;20m',
+                          'WARNING': '\033[33;20m',
+                          'ERROR': '\033[31;20m',
+                          'USER': '\033[38;20m',
+                          'reset': '\033[0m'}
+
+
 class LogClient:
-    'Class to interact with a logs server'
+    """
+    Class to interact with a logs server
+    """
+    def __init__(self, component):
 
-    def __init__(self, id, service_ns):
-        # id to identify the component
-        self._id = id
-
+        super().__init__()
         # Service client stuff
-        self.service_ns = service_ns
+        self.service_ns = 'ddbb_client/logger/insert'
         self.client = rospy.ServiceProxy(service_ns, LoggerQuery)
+        self.robot_id = os.environ['HOSTNAME']
+        self.component = component
+        # Create a dict to store the history of logs
+        # It is only used for throttling and logging once, it is not a file storing logs
+        self.log_history = dict()
+        self.throttle_timer = None
+        self.throttle_identical_timer = None
     
-    def add_debug(self, description, tag, verbose=True):
+    # Normal Log Messages
+    
+    def logdebug(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_DEBUG
-
-        return self.__send_request(query, verbose)
+        self.__stdout_log(query)
+        self.__send_request(query, verbose)
     
-    def add_info(self, description, tag, verbose=True):
+    def loginfo(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_INFO
-
-        return self.__send_request(query, verbose)
+        self.__stdout_log(query)
+        self.__send_request(query, verbose)
     
-    def add_warning(self, description, tag, verbose=True):
+    def logwarning(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_WARNING
-
-        return self.__send_request(query, verbose)
+        self.__stdout_log(query)
+        self.__send_request(query, verbose)
     
-    def add_error(self, description, tag, verbose=True):
+    def logerror(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_ERROR
-
-        return self.__send_request(query, verbose)
+        self.__stdout_log(query)
+        self.__send_request(query, verbose)
     
-    def add_user(self, description, tag, verbose=True):
+    def loguser(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_USER
+        self.__stdout_log(query)
+        self.__send_request(query, verbose)
 
-        return self.__send_request(query, verbose)
+    # Throttle Log Messages
+    
+    def logdebug_throttle(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_behavior(self.logdebug, time_period, description, tag, verbose)
+    
+    def loginfo_throttle(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_behavior(self.loginfo, time_period, description, tag, verbose)
 
+    def logwarning_throttle(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_behavior(self.logwarning, time_period, description, tag, verbose)
+
+    def logerror_throttle(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_behavior(self.logerror, time_period, description, tag, verbose)
+
+    def loguser_throttle(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_behavior(self.loguser, time_period, description, tag, verbose)
+
+    # Throttle Identical Log Messages
+    
+    def logdebug_throttle_identical(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_identical_behavior(self.logdebug, time_period, description, tag, verbose)
+    
+    def loginfo_throttle_identical(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_identical_behavior(self.loginfo, time_period, description, tag, verbose)
+
+    def logwarning_throttle_identical(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_identical_behavior(self.logwarning, time_period, description, tag, verbose)
+
+    def logerror_throttle_identical(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_identical_behavior(self.logerror, time_period, description, tag, verbose)
+
+    def loguser_throttle_identical(self, time_period, description, tag, verbose=True):
+        self.__perform_throttle_identical_behavior(self.loguser, time_period, description, tag, verbose)
+
+    # Log Once Messages
+
+    def logdebug_once(self, description, tag, verbose=True):
+        self.__perform_once_behavior(self.logdebug, description, tag, verbose)
+    
+    def loginfo_once(self, description, tag, verbose=True):
+        self.__perform_once_behavior(self.loginfo, description, tag, verbose)
+
+    def logwarning_once(self, description, tag, verbose=True):
+        self.__perform_once_behavior(self.logwarning, description, tag, verbose)
+
+    def logerror_once(self, description, tag, verbose=True):
+        self.__perform_once_behavior(self.logerror, description, tag, verbose)
+
+    def loguser_once(self, description, tag, verbose=True):
+        self.__perform_once_behavior(self.loguser, description, tag, verbose)
+
+    # Logging Behaviors
+    
+    def __perform_throttle_behavior(self, log_level_callable, time_period, description, tag, verbose):
+        # Get the caller's filename and line number
+        curframe = inspect.currentframe()
+        callframe = inspect.getouterframes(curframe, 2)[1]
+        filename, lineno = callframe.filename, callframe.lineno
+
+        # If the log already exists in the history, throttling is already activated
+        if (filename, lineno) in self.log_history.keys():
+            return
+
+        else:
+            # Store log data in history
+            self.log_history[(filename, lineno)] = description
+            # Log for the first time the msg
+            log_level_callable(description, tag, verbose)
+            # Create and start the throttling Timer
+            self.throttle_timer = threading.Timer(time_period, self.__erase_log_record, [filename, lineno])
+            self.throttle_timer.start()
+
+    def __perform_throttle_identical_behavior(self, log_level_callable, time_period, description, tag, verbose):
+        # Get the caller's filename and line number
+        curframe = inspect.currentframe()
+        callframe = inspect.getouterframes(curframe, 2)[1]
+        filename, lineno = callframe.filename, callframe.lineno
+
+        # If the log already exists in the history, throttling is already activated
+        if (filename, lineno) in self.log_history.keys() and self.log_history[(filename, lineno)] == description:
+            return
+
+        else:
+            # Store log data in history
+            self.log_history[(filename, lineno)] = description
+            # Log for the first time the msg
+            log_level_callable(description, tag, verbose)
+            # Create and start the throttling Timer, after erasing the previous Timer
+            if self.throttle_identical_timer:
+                self.throttle_identical_timer.cancel()
+            self.throttle_identical_timer = threading.Timer(time_period, self.__erase_log_record, [filename, lineno])
+            self.throttle_identical_timer.start()
+
+    def __perform_once_behavior(self, log_level_callable, description, tag, verbose):
+        # Get the caller's filename and line number
+        curframe = inspect.currentframe()
+        callframe = inspect.getouterframes(curframe, 2)[1]
+        filename, lineno = callframe.filename, callframe.lineno
+
+        # If the log already exists in the history, throttling is already activated
+        if (filename, lineno) in self.log_history.keys():
+            return
+
+        else:
+            # Store log data in history
+            self.log_history[(filename, lineno)] = description
+            # Log for the first time the msg
+            log_level_callable(description, tag, verbose)
+
+    def __erase_log_record(self, filename, lineno):
+        self.log_history.pop((filename, lineno))
+
+    def __stdout_log(self, query):
+        log_msg = f'[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}'
+        color_code = LOGLEVEL_COLOR_MAPPING[query.log_level]
+        reset_color = LOGLEVEL_COLOR_MAPPING['reset']
+        print(color_code + log_msg + reset_color)
+    
     def __build_base_query(self, description, tag):
         query = Logger()
-        query.component = self._id
-        query.description = description
+        query.robot_id = self.robot_id
+        query.date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        query.component = self.component
         query.tag = tag
+        query.description = description
         return query
 
     def __send_request(self, query, verbose):
@@ -100,5 +243,4 @@ class LogClient:
             rospy.loginfo("%s::LogClient::__send_request: Log '%s' correctly added" \
                 % (self._id, query.description))
         return True
-            
 

@@ -36,16 +36,15 @@ import rospy
 
 import time
 import threading
+try:
+    from log_client import LogClient
+except ImportError:
+    from rcomponent.log_client import LogClient
 
 try:
     from topic_health_monitor import TopicHealthMonitor
 except ImportError:
     from rcomponent.topic_health_monitor import TopicHealthMonitor
-
-try:
-    from log_client import LogClient
-except ImportError:
-    from rcomponent.log_client import LogClient
 
 from robotnik_msgs.msg import State
 
@@ -84,6 +83,11 @@ class RComponent:
         self._t_state_transition = rospy.Time(0)
         # dict to save all the topic health monitor objects
         self._data_health_monitors = {}
+
+        # Initialize logging client
+        self.log_cli = LogClient(self._node_name)
+
+
 
     def ros_read_params(self):
         '''
