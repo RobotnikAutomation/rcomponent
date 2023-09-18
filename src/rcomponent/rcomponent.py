@@ -137,7 +137,6 @@ class RComponent:
         # self.service_client = rospy.ServiceProxy('service_name', ServiceMsg)
         # ret = self.service_client.call(ServiceMsg)
 
-        self._log_client = LogClient(self._node_name, self._log_ns)
         self._ros_initialized = True
 
         self.publish_ros_state()
@@ -517,50 +516,6 @@ class RComponent:
 
         return ret
 
-    def loginfo(self, description='', tag=''):
-        '''
-            @brief Logs info msgs by using the log client component
-            @param description as string, contains the description of the log
-            @param tag as string, sets a tag to classify the types of log 
-            @return True if OK, False if ERROR
-        '''
-        return self._log_client.add_info(description=description, tag=tag)
-
-    def logwarn(self, description='', tag=''):
-        '''
-            @brief Logs warning msgs by using the log client component
-            @param description as string, contains the description of the log
-            @param tag as string, sets a tag to classify the types of log 
-            @return True if OK, False if ERROR
-        '''
-        return self._log_client.add_warning(description=description, tag=tag)
-
-    def logerr(self, description='', tag=''):
-        '''
-            @brief Logs error msgs by using the log client component
-            @param description as string, contains the description of the log
-            @param tag as string, sets a tag to classify the types of log 
-            @return True if OK, False if ERROR
-        '''
-        return self._log_client.add_error(description=description, tag=tag)
-
-    def logdebug(self, description='', tag=''):
-        '''
-            @brief Logs debug msgs by using the log client component
-            @param description as string, contains the description of the log
-            @param tag as string, sets a tag to classify the types of log 
-            @return True if OK, False if ERROR
-        '''
-        return self._log_client.add_debug(description=description, tag=tag)
-
-    def loguser(self, description='', tag=''):
-        '''
-            @brief Logs user msgs by using the log client component
-            @param description as string, contains the description of the log
-            @param tag as string, sets a tag to classify the types of log 
-            @return True if OK, False if ERROR
-        '''
-        return self._log_client.add_user(description=description, tag=tag)
     """
     def topic_cb(self, msg):
     	'''

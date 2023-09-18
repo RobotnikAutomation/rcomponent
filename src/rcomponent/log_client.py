@@ -33,7 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rospy
-from rospy.service import ServiceException
+from rospy.service import ServiceException, ROSException
 
 from robotnik_msgs.msg import Logger
 from robotnik_msgs.srv import LoggerQuery, LoggerQueryRequest
@@ -41,7 +41,7 @@ from robotnik_msgs.srv import LoggerQuery, LoggerQueryRequest
 from datetime import datetime
 import threading
 import inspect
-import os
+import platform
 
 
 LOGLEVEL_COLOR_MAPPING = {'DEBUG': '\033[92m',
@@ -56,13 +56,17 @@ class LogClient:
     """
     Class to interact with a logs server
     """
-    def __init__(self, component):
+    def __init__(self, component, service_timeout=20):
 
         super().__init__()
         # Service client stuff
-        self.service_ns = 'ddbb_client/logger/insert'
-        self.client = rospy.ServiceProxy(service_ns, LoggerQuery)
-        self.robot_id = os.environ['HOSTNAME']
+        self.service_ns = '/ddbb_client/logger/insert'
+        self.service_timeout = service_timeout
+        self.check_service_timer = None
+        # Check if service is available (checks periodically if service is available)
+        self.check_service_available()
+        
+        self.robot_id = platform.node()
         self.component = component
         # Create a dict to store the history of logs
         # It is only used for throttling and logging once, it is not a file storing logs
@@ -76,31 +80,46 @@ class LogClient:
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_DEBUG
         self.__stdout_log(query)
-        self.__send_request(query, verbose)
+        if self.client:
+            self.__send_request(query, verbose)
+        else:
+            self.__save_into_file(query)
     
     def loginfo(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_INFO
         self.__stdout_log(query)
-        self.__send_request(query, verbose)
+        if self.client:
+            self.__send_request(query, verbose)
+        else:
+            self.__save_into_file(query)
     
     def logwarning(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_WARNING
         self.__stdout_log(query)
-        self.__send_request(query, verbose)
+        if self.client:
+            self.__send_request(query, verbose)
+        else:
+            self.__save_into_file(query)
     
     def logerror(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_ERROR
         self.__stdout_log(query)
-        self.__send_request(query, verbose)
+        if self.client:
+            self.__send_request(query, verbose)
+        else:
+            self.__save_into_file(query)
     
     def loguser(self, description, tag, verbose=True):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_USER
         self.__stdout_log(query)
-        self.__send_request(query, verbose)
+        if self.client:
+            self.__send_request(query, verbose)
+        else:
+            self.__save_into_file(query)
 
     # Throttle Log Messages
     
@@ -236,11 +255,30 @@ class LogClient:
             self.client.call(request)
         except ServiceException as error:
             rospy.logerr_throttle(2, "%s::LogClient::__send_request: Error sending last log '%s'. %s" \
-                %(self._id, query.description, error))
-            return False
+                %(self.robot_id, query.description, error))
+            self.check_service_available()
         
         if verbose == True:
             rospy.loginfo("%s::LogClient::__send_request: Log '%s' correctly added" \
-                % (self._id, query.description))
-        return True
+                % (self.robot_id, query.description))
+    
+    def __save_into_file(self, query):
+        # Open the file, and store the log
+        with open("/home/robot/log_file.txt", "w+") as file:
+            log_msg = f"[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}"
+            file.write(log_msg)
 
+    def check_service_available(self):
+
+        if self.check_service_timer:
+            self.check_service_timer.cancel()
+        self.check_service_timer = threading.Timer(60, self.check_service_available)
+
+        try:
+            rospy.wait_for_service(self.service_ns, timeout=self.service_timeout)
+            self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
+        except ROSException as err:
+            rospy.logerr_throttle(2, f"{self.robot_id}::LogClient::rospy.wait_for_service: Service is not available. "
+                                  "Timeout of {service_timeout} seconds exceeded. {err}")
+            self.client = None    
+    
