@@ -84,9 +84,10 @@ class RComponent:
         # dict to save all the topic health monitor objects
         self._data_health_monitors = {}
 
+
+    def initialize_logger(self):
         # Initialize logging client
         self.log_cli = LogClient(self._node_name)
-
 
 
     def ros_read_params(self):

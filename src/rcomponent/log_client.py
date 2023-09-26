@@ -33,7 +33,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rospy
-from rospy.service import ServiceException, ROSException
+import rosservice
+from rosservice import ROSServiceIOException
 
 from robotnik_msgs.msg import Logger
 from robotnik_msgs.srv import LoggerQuery, LoggerQueryRequest
@@ -50,6 +51,7 @@ LOGLEVEL_COLOR_MAPPING = {'DEBUG': '\033[92m',
                           'ERROR': '\033[31;20m',
                           'USER': '\033[38;20m',
                           'reset': '\033[0m'}
+LOG_FILE_PATH = '/home/jmartinez/log_file.txt'
 
 
 class LogClient:
@@ -58,25 +60,29 @@ class LogClient:
     """
     def __init__(self, component, service_timeout=20):
 
-        super().__init__()
         # Service client stuff
         self.service_ns = '/ddbb_client/logger/insert'
         self.service_timeout = service_timeout
         self.check_service_timer = None
-        # Check if service is available (checks periodically if service is available)
-        self.check_service_available()
         
         self.robot_id = platform.node()
         self.component = component
+
         # Create a dict to store the history of logs
         # It is only used for throttling and logging once, it is not a file storing logs
         self.log_history = dict()
         self.throttle_timer = None
         self.throttle_identical_timer = None
+
+        # Create file to store logs in case the service is unavailable
+        open(LOG_FILE_PATH, 'a').close()
+
+        # Check if service is available (checks periodically if service is available)
+        self.check_service_available()
     
     # Normal Log Messages
     
-    def logdebug(self, description, tag, verbose=True):
+    def logdebug(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_DEBUG
         self.__stdout_log(query)
@@ -85,7 +91,7 @@ class LogClient:
         else:
             self.__save_into_file(query)
     
-    def loginfo(self, description, tag, verbose=True):
+    def loginfo(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_INFO
         self.__stdout_log(query)
@@ -94,7 +100,7 @@ class LogClient:
         else:
             self.__save_into_file(query)
     
-    def logwarning(self, description, tag, verbose=True):
+    def logwarning(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_WARNING
         self.__stdout_log(query)
@@ -103,7 +109,7 @@ class LogClient:
         else:
             self.__save_into_file(query)
     
-    def logerror(self, description, tag, verbose=True):
+    def logerror(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_ERROR
         self.__stdout_log(query)
@@ -112,7 +118,7 @@ class LogClient:
         else:
             self.__save_into_file(query)
     
-    def loguser(self, description, tag, verbose=True):
+    def loguser(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_USER
         self.__stdout_log(query)
@@ -123,53 +129,53 @@ class LogClient:
 
     # Throttle Log Messages
     
-    def logdebug_throttle(self, time_period, description, tag, verbose=True):
+    def logdebug_throttle(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_behavior(self.logdebug, time_period, description, tag, verbose)
     
-    def loginfo_throttle(self, time_period, description, tag, verbose=True):
+    def loginfo_throttle(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_behavior(self.loginfo, time_period, description, tag, verbose)
 
-    def logwarning_throttle(self, time_period, description, tag, verbose=True):
+    def logwarning_throttle(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_behavior(self.logwarning, time_period, description, tag, verbose)
 
-    def logerror_throttle(self, time_period, description, tag, verbose=True):
+    def logerror_throttle(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_behavior(self.logerror, time_period, description, tag, verbose)
 
-    def loguser_throttle(self, time_period, description, tag, verbose=True):
+    def loguser_throttle(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_behavior(self.loguser, time_period, description, tag, verbose)
 
     # Throttle Identical Log Messages
     
-    def logdebug_throttle_identical(self, time_period, description, tag, verbose=True):
+    def logdebug_throttle_identical(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_identical_behavior(self.logdebug, time_period, description, tag, verbose)
     
-    def loginfo_throttle_identical(self, time_period, description, tag, verbose=True):
+    def loginfo_throttle_identical(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_identical_behavior(self.loginfo, time_period, description, tag, verbose)
 
-    def logwarning_throttle_identical(self, time_period, description, tag, verbose=True):
+    def logwarning_throttle_identical(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_identical_behavior(self.logwarning, time_period, description, tag, verbose)
 
-    def logerror_throttle_identical(self, time_period, description, tag, verbose=True):
+    def logerror_throttle_identical(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_identical_behavior(self.logerror, time_period, description, tag, verbose)
 
-    def loguser_throttle_identical(self, time_period, description, tag, verbose=True):
+    def loguser_throttle_identical(self, time_period, description, tag, verbose=False):
         self.__perform_throttle_identical_behavior(self.loguser, time_period, description, tag, verbose)
 
     # Log Once Messages
 
-    def logdebug_once(self, description, tag, verbose=True):
+    def logdebug_once(self, description, tag, verbose=False):
         self.__perform_once_behavior(self.logdebug, description, tag, verbose)
     
-    def loginfo_once(self, description, tag, verbose=True):
+    def loginfo_once(self, description, tag, verbose=False):
         self.__perform_once_behavior(self.loginfo, description, tag, verbose)
 
-    def logwarning_once(self, description, tag, verbose=True):
+    def logwarning_once(self, description, tag, verbose=False):
         self.__perform_once_behavior(self.logwarning, description, tag, verbose)
 
-    def logerror_once(self, description, tag, verbose=True):
+    def logerror_once(self, description, tag, verbose=False):
         self.__perform_once_behavior(self.logerror, description, tag, verbose)
 
-    def loguser_once(self, description, tag, verbose=True):
+    def loguser_once(self, description, tag, verbose=False):
         self.__perform_once_behavior(self.loguser, description, tag, verbose)
 
     # Logging Behaviors
@@ -251,34 +257,39 @@ class LogClient:
     def __send_request(self, query, verbose):
         request = LoggerQueryRequest()
         request.query = query
-        try:
+        if self.service_ns in rosservice.get_service_list():
             self.client.call(request)
-        except ServiceException as error:
-            rospy.logerr_throttle(2, "%s::LogClient::__send_request: Error sending last log '%s'. %s" \
-                %(self.robot_id, query.description, error))
+        else:
             self.check_service_available()
+            self.logerror_throttle(2, f"{self.robot_id}::LogClient::__send_request: Error sending last log '{query.description}'", 'ERROR')
         
         if verbose == True:
-            rospy.loginfo("%s::LogClient::__send_request: Log '%s' correctly added" \
-                % (self.robot_id, query.description))
+            print(f"{self.robot_id}::LogClient::__send_request: Log '{query.description}' correctly added", 'VERBOSE')
     
     def __save_into_file(self, query):
         # Open the file, and store the log
-        with open("/home/robot/log_file.txt", "w+") as file:
-            log_msg = f"[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}"
+        with open(LOG_FILE_PATH, "a") as file:
+            log_msg = f"[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n"
             file.write(log_msg)
 
     def check_service_available(self):
 
         if self.check_service_timer:
             self.check_service_timer.cancel()
-        self.check_service_timer = threading.Timer(60, self.check_service_available)
+        self.check_service_timer = threading.Timer(15, self.check_service_available)
+        self.check_service_timer.daemon = True
+        self.check_service_timer.start()
 
         try:
-            rospy.wait_for_service(self.service_ns, timeout=self.service_timeout)
+            service_list = rosservice.get_service_list()
+        except ROSServiceIOException as err:
+            service_list = list()
+
+        if self.service_ns in service_list:
             self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
-        except ROSException as err:
-            rospy.logerr_throttle(2, f"{self.robot_id}::LogClient::rospy.wait_for_service: Service is not available. "
-                                  "Timeout of {service_timeout} seconds exceeded. {err}")
-            self.client = None    
+            self.loginfo_throttle(2, f"{self.robot_id}::LogClient::check_service_available: Service is available.", "SUCCESS")
+        else:
+            self.client = None
+            self.logerror_throttle(2, f"{self.robot_id}::LogClient::check_service_available: Service is not available.", "ERROR")
+            
     
