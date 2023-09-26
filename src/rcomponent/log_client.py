@@ -51,16 +51,15 @@ LOGLEVEL_COLOR_MAPPING = {'DEBUG': '\033[92m',
                           'ERROR': '\033[31;20m',
                           'USER': '\033[38;20m',
                           'reset': '\033[0m'}
-LOG_FILE_PATH = '/home/jmartinez/log_file.txt'
 
 
 class LogClient:
     """
     Class to interact with a logs server
     """
-    def __init__(self, component, service_timeout=20):
+    def __init__(self, component, log_file, service_timeout=20):
 
-        # Service client stuff
+        # Service client
         self.service_ns = '/ddbb_client/logger/insert'
         self.service_timeout = service_timeout
         self.check_service_timer = None
@@ -75,7 +74,8 @@ class LogClient:
         self.throttle_identical_timer = None
 
         # Create file to store logs in case the service is unavailable
-        open(LOG_FILE_PATH, 'a').close()
+        self._log_file = log_file
+        open(self._log_file, 'a').close()
 
         # Check if service is available (checks periodically if service is available)
         self.check_service_available()
@@ -268,7 +268,7 @@ class LogClient:
     
     def __save_into_file(self, query):
         # Open the file, and store the log
-        with open(LOG_FILE_PATH, "a") as file:
+        with open(self._log_file, "a") as file:
             log_msg = f"[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n"
             file.write(log_msg)
 

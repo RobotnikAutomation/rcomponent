@@ -87,7 +87,7 @@ class RComponent:
 
     def initialize_logger(self):
         # Initialize logging client
-        self.log_cli = LogClient(self._node_name)
+        self.log_cli = LogClient(self._node_name, self._log_file)
 
 
     def ros_read_params(self):
@@ -110,6 +110,7 @@ class RComponent:
 
         self._log_ns = 'logger/insert'
         self._log_ns = rospy.get_param('~log_ns', default=self._log_ns)
+        self._log_file = rospy.get_param('~log_file', default='/home/robot/log_file.txt')
 
     def setup(self):
         '''
