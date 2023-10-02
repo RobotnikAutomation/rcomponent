@@ -60,7 +60,7 @@ class LogClient:
     def __init__(self, component, log_file, service_timeout=20):
 
         # Service client
-        self.service_ns = '/ddbb_client/logger/insert'
+        self.service_ns = '/robot/ddbb_client/logger/insert'
         self.service_timeout = service_timeout
         self.check_service_timer = None
         

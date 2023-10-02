@@ -88,6 +88,7 @@ class RComponent:
     def initialize_logger(self):
         # Initialize logging client
         self.log_cli = LogClient(self._node_name, self._log_file)
+        return self.log_cli
 
 
     def ros_read_params(self):
