@@ -109,8 +109,6 @@ class RComponent:
                           (self._node_name, self._desired_freq, DEFAULT_FREQ))
             self._desired_freq = DEFAULT_FREQ
 
-        self._log_ns = 'logger/insert'
-        self._log_ns = rospy.get_param('~log_ns', default=self._log_ns)
         self._log_file = rospy.get_param('~log_file', default='/home/robot/log_file.txt')
 
     def setup(self):
