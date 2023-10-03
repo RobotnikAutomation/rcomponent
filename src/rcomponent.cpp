@@ -701,8 +701,8 @@ bool RComponent::checkTopicsHealth(std::string topic_id)
 
   if (data_health_monitors_.empty())
   {
-    RCOMPONENT_WARN_STREAM_THROTTLE(5, "Topics health monitor is empty");
-    return false;
+    RCOMPONENT_WARN_STREAM_ONCE("Topics health monitor is empty");
+    return true;
   }
 
   if (topic_id.empty() == false)
