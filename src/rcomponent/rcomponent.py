@@ -36,6 +36,10 @@ import rospy
 
 import time
 import threading
+try:
+    from log_client import LogClient
+except ImportError:
+    from rcomponent.log_client import LogClient
 
 try:
     from topic_health_monitor import TopicHealthMonitor
@@ -73,11 +77,19 @@ class RComponent:
         # Timer to publish state
         self._publish_state_timer = 1
 
-        self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
+        self._t_publish_state = threading.Timer(
+            self._publish_state_timer, self.publish_ros_state)
         # to save the time of the last state transition
         self._t_state_transition = rospy.Time(0)
         # dict to save all the topic health monitor objects
         self._data_health_monitors = {}
+
+
+    def initialize_logger(self):
+        # Initialize logging client
+        self.log_cli = LogClient(self._node_name, self._log_file)
+        return self.log_cli
+
 
     def ros_read_params(self):
         '''
@@ -85,7 +97,8 @@ class RComponent:
         '''
 
         try:
-            self._desired_freq = rospy.get_param('~desired_freq', default=DEFAULT_FREQ)
+            self._desired_freq = rospy.get_param(
+                '~desired_freq', default=DEFAULT_FREQ)
         except rospy.ROSException as e:
             rospy.logerr('%s' % (e))
             exit(-1)
@@ -95,6 +108,8 @@ class RComponent:
             rospy.loginfo('%s::init: Desired freq to %f is not possible. Setting _desired_freq to %f' %
                           (self._node_name, self._desired_freq, DEFAULT_FREQ))
             self._desired_freq = DEFAULT_FREQ
+
+        self._log_file = rospy.get_param('~log_file', default='/home/robot/log_file.txt')
 
     def setup(self):
         '''
@@ -224,7 +239,8 @@ class RComponent:
                 try:
                     rospy.sleep(t_sleep)
                 except rospy.exceptions.ROSInterruptException:
-                    rospy.loginfo('%s::control_loop: ROS interrupt exception' % self._node_name)
+                    rospy.loginfo(
+                        '%s::control_loop: ROS interrupt exception' % self._node_name)
                     self._running = False
 
             t3 = time.time()
@@ -408,7 +424,8 @@ class RComponent:
 
         if rospy.is_shutdown() == False:
             self._state_publisher.publish(self._msg_state)
-            self._t_publish_state = threading.Timer(self._publish_state_timer, self.publish_ros_state)
+            self._t_publish_state = threading.Timer(
+                self._publish_state_timer, self.publish_ros_state)
             self._t_publish_state.start()
 
     def get_state_transition_elapsed_time(self):
@@ -445,11 +462,14 @@ class RComponent:
             _topic_id = subscriber.resolved_name
 
         if timeout <= 0:
-            rospy.logerr('%s::add_topics_health: timeout (%.lf) has to be >= 0. Setting 1.', self._node_name, timeout)
+            rospy.logerr(
+                '%s::add_topics_health: timeout (%.lf) has to be >= 0. Setting 1.', self._node_name, timeout)
             timeout = 1.0
 
-        self._data_health_monitors[_topic_id] = TopicHealthMonitor(subscriber, timeout, required)
-        rospy.loginfo('%s::add_topics_health: Add topic %s', self._node_name, _topic_id)
+        self._data_health_monitors[_topic_id] = TopicHealthMonitor(
+            subscriber, timeout, required)
+        rospy.loginfo('%s::add_topics_health: Add topic %s',
+                      self._node_name, _topic_id)
         return 0
 
     def tick_topics_health(self, topic_id):
@@ -459,7 +479,8 @@ class RComponent:
             @return -1 if the id doesn't exist
         '''
         if topic_id not in self._data_health_monitors:
-            rospy.logerr('%s::tick_topics_health: the topic %s does not exist!', self._node_name, topic_id)
+            rospy.logerr(
+                '%s::tick_topics_health: the topic %s does not exist!', self._node_name, topic_id)
             return -1
 
         self._data_health_monitors[topic_id].tick()
@@ -476,7 +497,8 @@ class RComponent:
 
         if topic_id != '':
             if topic_id not in self._data_health_monitors:
-                rospy.logerr('%s::check_topics_health: the topic %s does not exist!', self._node_name, topic_id)
+                rospy.logerr(
+                    '%s::check_topics_health: the topic %s does not exist!', self._node_name, topic_id)
                 return False
             else:
                 return self._data_health_monitors[topic_id].is_receiving()
