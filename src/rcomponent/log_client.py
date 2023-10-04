@@ -269,7 +269,7 @@ class LogClient:
     def __save_into_file(self, query):
         # Open the file, and store the log
         with open(self._log_file, "a") as file:
-            log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}'
+            log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
             file.write(log_msg)
 
     def check_service_available(self):
