@@ -240,7 +240,7 @@ class LogClient:
         self.log_history.pop((filename, lineno))
 
     def __stdout_log(self, query):
-        log_msg = f'[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}'
+        log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}'
         color_code = LOGLEVEL_COLOR_MAPPING[query.log_level]
         reset_color = LOGLEVEL_COLOR_MAPPING['reset']
         print(color_code + log_msg + reset_color)
@@ -251,7 +251,7 @@ class LogClient:
         query.date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         query.component = self.component
         query.tag = tag
-        query.description = description
+        query.description = self.__format_str(description)
         return query
 
     def __send_request(self, query, verbose):
@@ -269,7 +269,7 @@ class LogClient:
     def __save_into_file(self, query):
         # Open the file, and store the log
         with open(self._log_file, "a") as file:
-            log_msg = f"[{query.log_level}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n"
+            log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
             file.write(log_msg)
 
     def check_service_available(self):
@@ -287,9 +287,22 @@ class LogClient:
 
         if self.service_ns in service_list:
             self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
-            self.loginfo_throttle(2, f"{self.robot_id}::LogClient::check_service_available: Service is available.", "SUCCESS")
+            self.loginfo_throttle(1800, f"{self.robot_id}::LogClient::check_service_available: Service is available.", "")
+            
         else:
             self.client = None
-            self.logerror_throttle(2, f"{self.robot_id}::LogClient::check_service_available: Service is not available.", "ERROR")
+            self.logerror_throttle(1800, f"{self.robot_id}::LogClient::check_service_available: Service is not available.", "")
+
+    @staticmethod
+    def __format_str(description):
+        banned_chars = ["'", '"']
+        for banned_char in banned_chars:
+            for i in range(description.count(banned_char)):
+                if i % 2 == 0:
+                    description = description.replace(banned_char, "(", 1)
+                else:
+                    description = description.replace(banned_char, ")", 1)
+
+        return description
             
     
