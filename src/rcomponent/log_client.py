@@ -294,7 +294,7 @@ class LogClient:
             service_status = 'AVAILABLE'
             
         # NOTE: log_throttle_identical() prints the last log msg when the log msg changes, that's why the availability values are inverted
-        rospy.logwarn_throttle_identical(1800, f"{self.robot_id}::LogClient::check_service_available: Logger Service status: {service_status}", "")
+        rospy.logwarn_throttle_identical(1800, f"{self.robot_id}::LogClient::check_service_available: Logger Service status: {service_status}")
 
     @staticmethod
     def __format_str(description):
