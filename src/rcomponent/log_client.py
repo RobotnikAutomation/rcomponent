@@ -287,11 +287,14 @@ class LogClient:
 
         if self.service_ns in service_list:
             self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
-            self.loginfo_throttle(1800, f"{self.robot_id}::LogClient::check_service_available: Service is available.", "")
+            service_status = 'NOT AVAILABLE'
             
         else:
             self.client = None
-            self.logerror_throttle(1800, f"{self.robot_id}::LogClient::check_service_available: Service is not available.", "")
+            service_status = 'AVAILABLE'
+            
+        # NOTE: log_throttle_identical() prints the last log msg when the log msg changes, that's why the availability values are inverted
+        rospy.logwarn_throttle_identical(1800, f"{self.robot_id}::LogClient::check_service_available: Logger Service status: {service_status}", "")
 
     @staticmethod
     def __format_str(description):
