@@ -262,7 +262,6 @@ class LogClient:
             self.client.call(request)
         except Exception as err:
             # self.check_service_available()
-            self.logerror_throttle(2, f"{self.robot_id}::LogClient::__send_request: Error sending last log '{query.description}'", 'ERROR')
             raise err
         
         if verbose == True:
