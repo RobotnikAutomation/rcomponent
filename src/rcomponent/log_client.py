@@ -63,6 +63,7 @@ class LogClient:
         self.service_ns = '/robot/ddbb_client/logger/insert'
         self.service_timeout = service_timeout
         self.check_service_timer = None
+        self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
         
         self.robot_id = platform.node()
         self.component = component
@@ -78,7 +79,7 @@ class LogClient:
         open(self._log_file, 'a').close()
 
         # Check if service is available (checks periodically if service is available)
-        self.check_service_available()
+        # self.check_service_available()
     
     # Normal Log Messages
     
@@ -86,45 +87,45 @@ class LogClient:
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_DEBUG
         self.__stdout_log(query)
-        if self.client:
+        try:
             self.__send_request(query, verbose)
-        else:
+        except Exception as err:
             self.__save_into_file(query)
     
     def loginfo(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_INFO
         self.__stdout_log(query)
-        if self.client:
+        try:
             self.__send_request(query, verbose)
-        else:
+        except Exception as err:
             self.__save_into_file(query)
     
     def logwarning(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_WARNING
         self.__stdout_log(query)
-        if self.client:
+        try:
             self.__send_request(query, verbose)
-        else:
+        except Exception as err:
             self.__save_into_file(query)
     
     def logerror(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_ERROR
         self.__stdout_log(query)
-        if self.client:
+        try:
             self.__send_request(query, verbose)
-        else:
+        except Exception as err:
             self.__save_into_file(query)
     
     def loguser(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_USER
         self.__stdout_log(query)
-        if self.client:
+        try:
             self.__send_request(query, verbose)
-        else:
+        except Exception as err:
             self.__save_into_file(query)
 
     # Throttle Log Messages
@@ -257,11 +258,12 @@ class LogClient:
     def __send_request(self, query, verbose):
         request = LoggerQueryRequest()
         request.query = query
-        if self.service_ns in rosservice.get_service_list():
+        try:
             self.client.call(request)
-        else:
-            self.check_service_available()
+        except Exception as err:
+            # self.check_service_available()
             self.logerror_throttle(2, f"{self.robot_id}::LogClient::__send_request: Error sending last log '{query.description}'", 'ERROR')
+            raise err
         
         if verbose == True:
             print(f"{self.robot_id}::LogClient::__send_request: Log '{query.description}' correctly added", 'VERBOSE')
@@ -272,29 +274,29 @@ class LogClient:
             log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
             file.write(log_msg)
 
-    def check_service_available(self):
+    # def check_service_available(self):
 
-        if self.check_service_timer:
-            self.check_service_timer.cancel()
-        self.check_service_timer = threading.Timer(15, self.check_service_available)
-        self.check_service_timer.daemon = True
-        self.check_service_timer.start()
+    #     if self.check_service_timer:
+    #         self.check_service_timer.cancel()
+    #     self.check_service_timer = threading.Timer(15, self.check_service_available)
+    #     self.check_service_timer.daemon = True
+    #     self.check_service_timer.start()
 
-        try:
-            service_list = rosservice.get_service_list()
-        except ROSServiceIOException as err:
-            service_list = list()
+    #     try:
+    #         service_list = rosservice.get_service_list()
+    #     except ROSServiceIOException as err:
+    #         service_list = list()
 
-        if self.service_ns in service_list:
-            self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
-            service_status = 'NOT AVAILABLE'
+    #     if self.service_ns in service_list:
+    #         self.client = rospy.ServiceProxy(self.service_ns, LoggerQuery)
+    #         service_status = 'NOT AVAILABLE'
             
-        else:
-            self.client = None
-            service_status = 'AVAILABLE'
+    #     else:
+    #         self.client = None
+    #         service_status = 'AVAILABLE'
             
-        # NOTE: log_throttle_identical() prints the last log msg when the log msg changes, that's why the availability values are inverted
-        rospy.logwarn_throttle_identical(1800, f"{self.robot_id}::LogClient::check_service_available: Logger Service status: {service_status}")
+    #     # NOTE: log_throttle_identical() prints the last log msg when the log msg changes, that's why the availability values are inverted
+    #     rospy.logwarn_throttle_identical(1800, f"{self.robot_id}::LogClient::check_service_available: Logger Service status: {service_status}")
 
     @staticmethod
     def __format_str(description):
