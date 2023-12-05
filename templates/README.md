@@ -19,7 +19,7 @@ does...
 ### 1.2 Subscribed Topics
 
 * foo/topic_name1 (std_msgs/String)
-  topic_desciption 1
+  topic_description 1
 
 ### 1.3 Published Topics
 
