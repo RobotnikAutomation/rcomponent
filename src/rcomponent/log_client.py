@@ -76,7 +76,11 @@ class LogClient:
 
         # Create file to store logs in case the service is unavailable
         self._log_file = log_file
-        open(self._log_file, 'a').close()
+
+        try:
+            open(self._log_file, 'a').close()
+        except FileNotFoundError as exception:
+            rospy.logerr("%s::LogClient:__init__: Unable to create the log file: %s" % (component, exception))
 
         # Check if service is available (checks periodically if service is available)
         # self.check_service_available()
@@ -268,10 +272,14 @@ class LogClient:
             print(f"{self.robot_id}::LogClient::__send_request: Log '{query.description}' correctly added", 'VERBOSE')
     
     def __save_into_file(self, query):
-        # Open the file, and store the log
-        with open(self._log_file, "a") as file:
-            log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
-            file.write(log_msg)
+        try:
+            # Open the file, and store the log
+            with open(self._log_file, "a") as file:
+                log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
+                file.write(log_msg)
+        except FileNotFoundError as exception:
+            rospy.logerr("%s::LogClient:__save_into_file: Unable to write into log file: %s" % (self.component, exception))
+
 
     # def check_service_available(self):
 
