@@ -33,6 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rospy
+import os
 
 import time
 import threading
@@ -109,7 +110,7 @@ class RComponent:
                           (self._node_name, self._desired_freq, DEFAULT_FREQ))
             self._desired_freq = DEFAULT_FREQ
 
-        self._log_file = rospy.get_param('~log_file', default='/home/robot/log_file.txt')
+        self._log_file = rospy.get_param('~log_file', default=os.path.join(os.getenv('HOME', '/default/fallback/path'), 'log_file.txt'))
 
     def setup(self):
         '''
