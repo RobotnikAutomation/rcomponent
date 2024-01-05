@@ -228,6 +228,9 @@ class RComponent:
 
             elif self._state == State.SHUTDOWN_STATE:
                 self.shutdown_state()
+            else:
+                rospy.logerr_throttle(5,'%s::control_loop: unknown state %d' %
+                             (self._node_name, self._state))
 
             self.all_state()
 
