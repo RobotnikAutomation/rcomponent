@@ -55,7 +55,9 @@ private:
 
       // topic, queue, callback
       sub_ = nh_.subscribe(subs_topic_name_, 10, &SimpleComponent::callback, this);
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
   // Inherits from RComponent
   int rosShutdown()
@@ -63,7 +65,9 @@ private:
     if (RComponent::rosShutdown() == rcomponent::OK)
     {
       RCOMPONENT_INFO("");
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
 
   //
