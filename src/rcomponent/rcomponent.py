@@ -88,7 +88,7 @@ class RComponent:
 
     def initialize_logger(self):
         # Initialize logging client
-        self.log_cli = LogClient(self._node_name, self._log_file)
+        self.log_cli = LogClient(self._node_name)
         return self.log_cli
 
 
@@ -109,8 +109,6 @@ class RComponent:
             rospy.loginfo('%s::init: Desired freq to %f is not possible. Setting _desired_freq to %f' %
                           (self._node_name, self._desired_freq, DEFAULT_FREQ))
             self._desired_freq = DEFAULT_FREQ
-
-        self._log_file = rospy.get_param('~log_file', default=os.path.join(os.getenv('HOME', '/default/fallback/path'), 'log_file.txt'))
 
     def setup(self):
         '''

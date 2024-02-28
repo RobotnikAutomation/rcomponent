@@ -57,7 +57,7 @@ class LogClient:
     """
     Class to interact with a logs server
     """
-    def __init__(self, component, log_file, service_timeout=20):
+    def __init__(self, component, service_timeout=20):
 
         # Service client
         self.service_ns = rospy.get_param("add_log_service_namespace", 'ddbb_client/logger/insert')
@@ -73,17 +73,6 @@ class LogClient:
         self.log_history = dict()
         self.throttle_timer = None
         self.throttle_identical_timer = None
-
-        # Create file to store logs in case the service is unavailable
-        self._log_file = log_file
-
-        try:
-            open(self._log_file, 'a').close()
-        except FileNotFoundError as exception:
-            rospy.logerr("%s::LogClient:__init__: Unable to create the log file: %s" % (component, exception))
-
-        # Check if service is available (checks periodically if service is available)
-        # self.check_service_available()
     
     # Normal Log Messages
     
@@ -91,46 +80,31 @@ class LogClient:
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_DEBUG
         self.__stdout_log(query)
-        try:
-            self.__send_request(query, verbose)
-        except Exception as err:
-            self.__save_into_file(query)
+        self.__send_request(query, verbose)
     
     def loginfo(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_INFO
         self.__stdout_log(query)
-        try:
-            self.__send_request(query, verbose)
-        except Exception as err:
-            self.__save_into_file(query)
+        self.__send_request(query, verbose)
     
     def logwarning(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_WARNING
         self.__stdout_log(query)
-        try:
-            self.__send_request(query, verbose)
-        except Exception as err:
-            self.__save_into_file(query)
+        self.__send_request(query, verbose)
     
     def logerror(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_ERROR
         self.__stdout_log(query)
-        try:
-            self.__send_request(query, verbose)
-        except Exception as err:
-            self.__save_into_file(query)
+        self.__send_request(query, verbose)
     
     def loguser(self, description, tag, verbose=False):
         query = self.__build_base_query(description, tag)
         query.log_level = Logger.LOG_LEVEL_USER
         self.__stdout_log(query)
-        try:
-            self.__send_request(query, verbose)
-        except Exception as err:
-            self.__save_into_file(query)
+        self.__send_request(query, verbose)
 
     # Throttle Log Messages
     
@@ -264,21 +238,11 @@ class LogClient:
         request.query = query
         try:
             self.client.call(request)
-        except Exception as err:
-            # self.check_service_available()
-            raise err
-        
-        if verbose == True:
-            print(f"{self.robot_id}::LogClient::__send_request: Log '{query.description}' correctly added", 'VERBOSE')
+            if verbose == True:
+                rospy.loginfo(f"{self.robot_id}::LogClient::__send_request: Log '{query.description}' correctly added", 'VERBOSE')
     
-    def __save_into_file(self, query):
-        try:
-            # Open the file, and store the log
-            with open(self._log_file, "a") as file:
-                log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
-                file.write(log_msg)
-        except FileNotFoundError as exception:
-            rospy.logerr("%s::LogClient:__save_into_file: Unable to write into log file: %s" % (self.component, exception))
+        except Exception as err:
+            rospy.logerr(f'An Exception was raised while calling the {self.service_ns} service: {err}')
 
 
     # def check_service_available(self):
