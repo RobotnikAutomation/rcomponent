@@ -1,5 +1,5 @@
 rosPipeline(
-  rosdistro: ["melodic", "noetic"],
+  rosdistro: getDistroFromBranch(env.CHANGE_TARGET),
   upstreamProjects: 'robotnik_msgs/ros-devel',
-  upload: true,
+  upload: needUpload(env.BRANCH_NAME),
 )

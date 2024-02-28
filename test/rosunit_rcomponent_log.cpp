@@ -17,8 +17,6 @@ TEST(TestProcedureComponent, shouldGetProperNamespaces)
 
   EXPECT_EQ("/rosunit_rcomponent", component.getPublicNamespace());
   EXPECT_EQ("/rosunit_rcomponent/private", component.getPrivateNamespace());
-
-  FAIL();
 }
 
 int main(int argc, char** argv)
