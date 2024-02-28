@@ -1,4 +1,3 @@
 <launch>
-  
   <test test-name="rosunit_rcomponent" pkg="rcomponent" type="rosunit_rcomponent_log"/>
 </launch>

@@ -3,9 +3,6 @@
 
 #include <rcomponent/rcomponent.h>
 
-#include <log4cxx/appenderskeleton.h>
-#include <log4cxx/spi/loggingevent.h>
-
 TEST(TestProcedureComponent, shouldGetProperNamespaces)
 {
   ros::NodeHandle nh("~");
@@ -19,7 +16,7 @@ TEST(TestProcedureComponent, shouldGetProperNamespaces)
   EXPECT_EQ("/rosunit_rcomponent/private", component.getPrivateNamespace());
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "rosunit_component_log");
 

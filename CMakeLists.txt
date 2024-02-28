@@ -1,40 +1,40 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(rcomponent)
 
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  std_srvs
-  robotnik_msgs
-  diagnostic_msgs
-  diagnostic_updater
-  self_test
+    roscpp
+    std_msgs
+    std_srvs
+    robotnik_msgs
+    diagnostic_msgs
+    diagnostic_updater
+    self_test
 )
 
 catkin_python_setup()
 
 catkin_package(
-  INCLUDE_DIRS
-    include
-  LIBRARIES
-    ${PROJECT_NAME}
-  CATKIN_DEPENDS
-    robotnik_msgs
-  DEPENDS
+    INCLUDE_DIRS
+        include
+    LIBRARIES
+        ${PROJECT_NAME}
+    CATKIN_DEPENDS
+        robotnik_msgs
+    DEPENDS
 )
 
 include_directories(
-   include
-  ${catkin_INCLUDE_DIRS}
+    include
+    ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
 add_library(rcomponent
-   include/rcomponent/rcomponent.h
-   include/rcomponent/rcomponent_log_macros.h
-   src/rcomponent.cpp
+    include/rcomponent/rcomponent.h
+    include/rcomponent/rcomponent_log_macros.h
+    src/rcomponent.cpp
 )
 
 ## Declare a cpp executable
@@ -53,20 +53,20 @@ add_dependencies(rcomponent_diagnostic robotnik_msgs_generate_messages_cpp)
 
 
 target_link_libraries(rcomponent_server
-   rcomponent
-   ${catkin_LIBRARIES}
+    rcomponent
+    ${catkin_LIBRARIES}
 )
 target_link_libraries(rcomponent_simple
-   rcomponent
-   ${catkin_LIBRARIES}
+    rcomponent
+    ${catkin_LIBRARIES}
 )
 target_link_libraries(rcomponent_simple_async
-   rcomponent
-   ${catkin_LIBRARIES}
+    rcomponent
+    ${catkin_LIBRARIES}
 )
 target_link_libraries(rcomponent_diagnostic
-   rcomponent
-   ${catkin_LIBRARIES}
+    rcomponent
+    ${catkin_LIBRARIES}
 )
 
 #############
@@ -76,14 +76,14 @@ target_link_libraries(rcomponent_diagnostic
 
 ## Mark executables and/or libraries for installation
 install(TARGETS rcomponent
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
 )
 
 

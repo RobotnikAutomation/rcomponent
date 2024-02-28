@@ -11,11 +11,9 @@ TEST(TestProcedureComponent, shouldGetProperNamespaces)
 
   EXPECT_EQ("/rosunit_procedure_component", component.getPublicNamespace());
   EXPECT_EQ("/rosunit_procedure_component/private", component.getPrivateNamespace());
-
-  FAIL();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "rosunit_procedure_component");
 
