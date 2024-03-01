@@ -134,6 +134,7 @@ templates_path=`rospack find rcomponent`"/templates"
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/launch
 mkdir -p $pkg_path/src/$rc_package
+mkdir -p $pkg_path/.github/ISSUE_TEMPLATE
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"
@@ -229,3 +230,7 @@ echo -e "$readme" > $pkg_path/README.md
 
 # Gitignore file
 cp $templates_path/.gitignore $pkg_path/.gitignore
+
+# GitHub issue templates
+cp $templates_path/standard-bug-report.yml $pkg_path/.github/ISSUE_TEMPLATE/standard-bug-report.yml
+cp $templates_path/standard-feature-template.yml $pkg_path/.github/ISSUE_TEMPLATE/standard-feature-template.yml
