@@ -277,6 +277,7 @@ class LogClient:
             with open(self._log_file, "a") as file:
                 log_msg = f'[{query.log_level:<7}] [{query.date_time}] [{query.robot_id}] [{query.component}] [{query.tag}] {query.description}\n'
                 file.write(log_msg)
+                file.close()
         except FileNotFoundError as exception:
             rospy.logerr("%s::LogClient:__save_into_file: Unable to write into log file: %s" % (self.component, exception))
 
