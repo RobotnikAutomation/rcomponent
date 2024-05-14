@@ -39,7 +39,7 @@ from rosservice import ROSServiceIOException
 from robotnik_msgs.msg import Logger
 from robotnik_msgs.srv import LoggerQuery, LoggerQueryRequest
 
-from datetime import datetime
+from datetime import datetime, timezone
 import threading
 import inspect
 import platform
@@ -253,9 +253,15 @@ class LogClient:
     def __build_base_query(self, description, tag):
         query = Logger()
         query.robot_id = self.robot_id
-        query.date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        #query.date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        #query.date_time = datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')
+        #query.date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        query.date_time = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         query.component = self.component
-        query.tag = tag
+        if tag == "":
+            query.tag = "UNKNOWN"
+        else:
+            query.tag = tag
         query.description = self.__format_str(description)
         return query
 
