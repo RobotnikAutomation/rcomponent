@@ -145,7 +145,7 @@ fi
 # CREATE PACKAGE
 
 pkg_path=$dest_path/$rc_package
-templates_path=`rospack find rcomponent`"/templates"
+templates_path="$(rospack find $pkg_name)/templates"
 
 # Create directories
 mkdir -p $pkg_path/config
@@ -159,6 +159,7 @@ touch $pkg_path/config/"example.yaml"
 rc_node_py_launch="$(cat $templates_path/rc_node_py.launch)"
 rc_node_py_launch=${rc_node_py_launch//"?rc_package"/$rc_package}
 rc_node_py_launch=${rc_node_py_launch//"?RCNode"/$RCNode}
+rc_node_py_launch=${rc_node_py_launch//"?rc_node_logic"/$rc_node_logic}
 rc_node_py_launch=${rc_node_py_launch//"?rc_node"/$rc_node}
 rc_node_py_launch=${rc_node_py_launch//"?RC_NODE"/$RC_NODE}
 rc_node_py_launch=${rc_node_py_launch//"?authorName"/$authorName}
@@ -172,6 +173,7 @@ touch $pkg_path/src/$rc_package/__init__.py
 setup_py="$(cat $templates_path/setup.py)"
 setup_py=${setup_py//"?rc_package"/$rc_package}
 setup_py=${setup_py//"?RCNode"/$RCNode}
+setup_py=${setup_py//"?rc_node_logic"/$rc_node_logic}
 setup_py=${setup_py//"?rc_node"/$rc_node}
 setup_py=${setup_py//"?RC_NODE"/$RC_NODE}
 setup_py=${setup_py//"?authorName"/$authorName}
@@ -182,16 +184,18 @@ echo -e "$setup_py" > $pkg_path/setup.py
 rc_node_py="$(cat $templates_path/rc_node.py)"
 rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
 rc_node_py=${rc_node_py//"?RCNode"/$RCNode}
-rc_node_py=${rc_node_py//"?rc_node"/$rc_node_logic}
+rc_node_py=${rc_node_py//"?rc_node_logic"/$rc_node_logic}
+rc_node_py=${rc_node_py//"?rc_node"/$rc_node}
 rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_py=${rc_node_py//"?authorName"/$authorName}
 rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
 rc_node_py=${rc_node_py//"?brief"/$brief}
-echo -e "$rc_node_py" > $pkg_path/src/$rc_package/$rc_node.py
+echo -e "$rc_node_py" > $pkg_path/src/$rc_package/$rc_node_logic.py
 
 rc_node_node_py="$(cat $templates_path/rc_node_node.py)"
 rc_node_node_py=${rc_node_node_py//"?rc_package"/$rc_package}
 rc_node_node_py=${rc_node_node_py//"?RCNode"/$RCNode}
+rc_node_node_py=${rc_node_node_py//"?rc_node_logic"/$rc_node_logic}
 rc_node_node_py=${rc_node_node_py//"?rc_node"/$rc_node}
 rc_node_node_py=${rc_node_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_node_py=${rc_node_node_py//"?authorName"/$authorName}
@@ -204,6 +208,7 @@ chmod +x $pkg_path/src/$rc_package/$rc_node"_node.py"
 changelog="$(cat $templates_path/CHANGELOG.rst)"
 changelog=${changelog//"?rc_package"/$rc_package}
 changelog=${changelog//"?RCNode"/$RCNode}
+changelog=${changelog//"?rc_node_logic"/$rc_node_logic}
 changelog=${changelog//"?rc_node"/$rc_node}
 changelog=${changelog//"?RC_NODE"/$RC_NODE}
 changelog=${changelog//"?authorName"/$authorName}
@@ -215,6 +220,7 @@ echo -e "$changelog" > $pkg_path/CHANGELOG.rst
 cmakelists="$(cat $templates_path/CMakeLists_py.txt)"
 cmakelists=${cmakelists//"?rc_package"/$rc_package}
 cmakelists=${cmakelists//"?RCNode"/$RCNode}
+cmakelists=${cmakelists//"?rc_node_logic"/$rc_node_logic}
 cmakelists=${cmakelists//"?rc_node"/$rc_node}
 cmakelists=${cmakelists//"?RC_NODE"/$RC_NODE}
 cmakelists=${cmakelists//"?authorName"/$authorName}
@@ -226,6 +232,7 @@ echo -e "$cmakelists" > $pkg_path/CMakeLists.txt
 pkg_xml="$(cat $templates_path/package_py.xml)"
 pkg_xml=${pkg_xml//"?rc_package"/$rc_package}
 pkg_xml=${pkg_xml//"?RCNode"/$RCNode}
+pkg_xml=${pkg_xml//"?rc_node_logic"/$rc_node_logic}
 pkg_xml=${pkg_xml//"?rc_node"/$rc_node}
 pkg_xml=${pkg_xml//"?RC_NODE"/$RC_NODE}
 pkg_xml=${pkg_xml//"?authorName"/$authorName}
@@ -237,6 +244,7 @@ echo -e "$pkg_xml" > $pkg_path/package.xml
 readme="$(cat $templates_path/README.md)"
 readme=${readme//"?rc_package"/$rc_package}
 readme=${readme//"?RCNode"/$RCNode}
+readme=${readme//"?rc_node_logic"/$rc_node_logic}
 readme=${readme//"?rc_node"/$rc_node}
 readme=${readme//"?RC_NODE"/$RC_NODE}
 readme=${readme//"?authorName"/$authorName}
