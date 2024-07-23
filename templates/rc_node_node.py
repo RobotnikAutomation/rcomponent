@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from ?rc_node import ?RCNode
+from ?rc_package.?rc_node import ?RCNode
 
 
 def main():

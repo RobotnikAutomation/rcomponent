@@ -107,6 +107,23 @@ else
         exit 1
     fi
 
+    # Load rc_node logic script name
+    echo -e -n "\n${reset}Name of the main script using snake_case, which cannot be the same as the main class name (e.g. "
+    echo -e    "${italic}calibration_odom${reset}): "
+    read rc_node_logic
+    if [ -z "$rc_node_logic" ]
+    then
+        echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
+        exit 1
+    fi
+
+    # Check if rc_node_logic has same name as rc_node name
+    if [ "$rc_node" == "$rc_node_logic" ]
+    then
+        echo -e "${bold}${red}The logic script name cannot be the same as the main class name. Stopping the script."
+        exit 1
+    fi
+
     # Load RC_NODE name
     RC_NODE=${rc_node^^}
 
@@ -165,7 +182,7 @@ echo -e "$setup_py" > $pkg_path/setup.py
 rc_node_py="$(cat $templates_path/rc_node.py)"
 rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
 rc_node_py=${rc_node_py//"?RCNode"/$RCNode}
-rc_node_py=${rc_node_py//"?rc_node"/$rc_node}
+rc_node_py=${rc_node_py//"?rc_node"/$rc_node_logic}
 rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_py=${rc_node_py//"?authorName"/$authorName}
 rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
