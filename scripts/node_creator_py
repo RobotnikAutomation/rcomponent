@@ -106,24 +106,28 @@ else
         echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
         exit 1
     fi
-
+    rc_node_py="${rc_node}_node"
     # Load rc_node logic script name
-    echo -e -n "\n${reset}Name of the main script using snake_case, which cannot be the same as the main class name (e.g. "
+    echo -e -n "\n${reset}Name of the main script using snake_case, which cannot be the same as the main class name ($rc_node) nor ($rc_node_py) (e.g. "
     echo -e    "${italic}calibration_odom${reset}): "
     read rc_node_logic
-    if [ -z "$rc_node_logic" ]
-    then
-        echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
-        exit 1
-    fi
+    
 
     # Check if rc_node_logic has same name as rc_node name
-    if [ "$rc_node" == "$rc_node_logic" ]
-    then
-        echo -e "${bold}${red}The logic script name cannot be the same as the main class name. Stopping the script."
-        exit 1
-    fi
-
+    while [ "$rc_node" == "$rc_node_logic" ] || [ -z "$rc_node_logic" ] || [ "$rc_node_py" == "$rc_node_logic" ] 
+    do
+        if [ -z "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}You have skipped a required argument...${reset}"
+        elif [ "$rc_node" == "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}The logic script name cannot be the same as the main class name -> $rc_node...${reset}"
+        elif [ "$rc_node_py" == "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}The logic script name cannot be the same as the main script name -> $rc_node_py...${reset}"
+        fi
+        read rc_node_logic
+    done
     # Load RC_NODE name
     RC_NODE=${rc_node^^}
 
@@ -134,6 +138,12 @@ else
     # Load author email
     echo -e -n "\n${reset}Author email: "
     read authorEmail
+    # Validate email format
+    while [[ ! "$authorEmail" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]
+    do
+        echo -e "${bold}${red}Invalid email format...${reset}"
+        read authorEmail
+    done
 
     # Load node description
     echo -e -n "\n${reset}Description of the node (not required, but recommended): "
@@ -145,12 +155,15 @@ fi
 # CREATE PACKAGE
 
 pkg_path=$dest_path/$rc_package
+echo -e "\n${reset}Creating package in ${bold}${italic}$pkg_path${reset}..."
 templates_path="$(rospack find rcomponent)/templates"
+echo -e "\n${reset}Copying templates from ${bold}${italic}$templates_path${reset}..."
 
 # Create directories
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/launch
 mkdir -p $pkg_path/src/$rc_package
+echo -e "\n${reset}Directories created..."
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"
@@ -254,3 +267,4 @@ echo -e "$readme" > $pkg_path/README.md
 
 # Gitignore file
 cp $templates_path/.gitignore $pkg_path/.gitignore
+echo -e "\n${reset}The package $rc_package was created successfully..."
