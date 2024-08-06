@@ -71,8 +71,8 @@ then
     RCNode="TsTest"
     rc_node="ts_test"
     RC_NODE=${rc_node^^}
-    authorName="José Gómez"
-    authorEmail="jgomez@robotnik.es"
+    authorName="Robotnik"
+    authorEmail="info@robotnik.es"
     brief="Description of the package"
 
 else
