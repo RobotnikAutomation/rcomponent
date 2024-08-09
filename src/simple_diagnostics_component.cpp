@@ -85,7 +85,9 @@ protected:
       diagnostic_->add("Test", this, &SimpleDiagnosticsComponent::diagnosticUpdate);
       diagnostic_->add(*freq_diag_);
       diagnostic_->add(*command_freq_);
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
 
   // Inherits from RComponent
@@ -95,7 +97,9 @@ protected:
     {
       RCOMPONENT_INFO("");
       service_server_.shutdown();
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
 
   // Callback handler for the service server

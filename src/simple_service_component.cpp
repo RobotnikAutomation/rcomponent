@@ -50,7 +50,9 @@ protected:
 
       service_server_ = pnh_.advertiseService(service_server_name_, &SimpleServiceComponent::serviceServerCb, this);
       service_client_ = nh_.serviceClient<std_srvs::Empty>(service_client_name_);
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
 
   // Inherits from RComponent
@@ -60,7 +62,9 @@ protected:
     {
       RCOMPONENT_INFO("rosShutdown");
       service_server_.shutdown();
+      return rcomponent::OK;
     }
+    return rcomponent::ERROR;
   }
 
   // Callback handler for the service server
