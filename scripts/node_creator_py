@@ -71,8 +71,8 @@ then
     RCNode="TsTest"
     rc_node="ts_test"
     RC_NODE=${rc_node^^}
-    authorName="José Gómez"
-    authorEmail="jgomez@robotnik.es"
+    authorName="Robotnik"
+    authorEmail="info@robotnik.es"
     brief="Description of the package"
 
 else
@@ -106,7 +106,28 @@ else
         echo -e "${bold}${red}You have skipped a required argument. Stopping the script."
         exit 1
     fi
+    rc_node_py="${rc_node}_node"
+    # Load rc_node logic script name
+    echo -e -n "\n${reset}Name of the main script using snake_case, which cannot be the same as the main class name ($rc_node) nor ($rc_node_py) (e.g. "
+    echo -e    "${italic}calibration_odom${reset}): "
+    read rc_node_logic
+    
 
+    # Check if rc_node_logic has same name as rc_node name
+    while [ "$rc_node" == "$rc_node_logic" ] || [ -z "$rc_node_logic" ] || [ "$rc_node_py" == "$rc_node_logic" ] 
+    do
+        if [ -z "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}You have skipped a required argument...${reset}"
+        elif [ "$rc_node" == "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}The logic script name cannot be the same as the main class name -> $rc_node...${reset}"
+        elif [ "$rc_node_py" == "$rc_node_logic" ]
+        then
+            echo -e "${bold}${red}The logic script name cannot be the same as the main script name -> $rc_node_py...${reset}"
+        fi
+        read rc_node_logic
+    done
     # Load RC_NODE name
     RC_NODE=${rc_node^^}
 
@@ -117,6 +138,12 @@ else
     # Load author email
     echo -e -n "\n${reset}Author email: "
     read authorEmail
+    # Validate email format
+    while [[ ! "$authorEmail" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]
+    do
+        echo -e "${bold}${red}Invalid email format...${reset}"
+        read authorEmail
+    done
 
     # Load node description
     echo -e -n "\n${reset}Description of the node (not required, but recommended): "
@@ -128,13 +155,15 @@ fi
 # CREATE PACKAGE
 
 pkg_path=$dest_path/$rc_package
-templates_path=`rospack find rcomponent`"/templates"
+echo -e "\n${reset}Creating package in ${bold}${italic}$pkg_path${reset}..."
+templates_path="$(rospack find rcomponent)/templates"
+echo -e "\n${reset}Copying templates from ${bold}${italic}$templates_path${reset}..."
 
 # Create directories
 mkdir -p $pkg_path/config
 mkdir -p $pkg_path/launch
 mkdir -p $pkg_path/src/$rc_package
-mkdir -p $pkg_path/.github/ISSUE_TEMPLATE
+echo -e "\n${reset}Directories created..."
 
 # Create .yaml
 touch $pkg_path/config/"example.yaml"
@@ -143,6 +172,7 @@ touch $pkg_path/config/"example.yaml"
 rc_node_py_launch="$(cat $templates_path/rc_node_py.launch)"
 rc_node_py_launch=${rc_node_py_launch//"?rc_package"/$rc_package}
 rc_node_py_launch=${rc_node_py_launch//"?RCNode"/$RCNode}
+rc_node_py_launch=${rc_node_py_launch//"?rc_node_logic"/$rc_node_logic}
 rc_node_py_launch=${rc_node_py_launch//"?rc_node"/$rc_node}
 rc_node_py_launch=${rc_node_py_launch//"?RC_NODE"/$RC_NODE}
 rc_node_py_launch=${rc_node_py_launch//"?authorName"/$authorName}
@@ -156,6 +186,7 @@ touch $pkg_path/src/$rc_package/__init__.py
 setup_py="$(cat $templates_path/setup.py)"
 setup_py=${setup_py//"?rc_package"/$rc_package}
 setup_py=${setup_py//"?RCNode"/$RCNode}
+setup_py=${setup_py//"?rc_node_logic"/$rc_node_logic}
 setup_py=${setup_py//"?rc_node"/$rc_node}
 setup_py=${setup_py//"?RC_NODE"/$RC_NODE}
 setup_py=${setup_py//"?authorName"/$authorName}
@@ -166,16 +197,18 @@ echo -e "$setup_py" > $pkg_path/setup.py
 rc_node_py="$(cat $templates_path/rc_node.py)"
 rc_node_py=${rc_node_py//"?rc_package"/$rc_package}
 rc_node_py=${rc_node_py//"?RCNode"/$RCNode}
+rc_node_py=${rc_node_py//"?rc_node_logic"/$rc_node_logic}
 rc_node_py=${rc_node_py//"?rc_node"/$rc_node}
 rc_node_py=${rc_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_py=${rc_node_py//"?authorName"/$authorName}
 rc_node_py=${rc_node_py//"?authorEmail"/$authorEmail}
 rc_node_py=${rc_node_py//"?brief"/$brief}
-echo -e "$rc_node_py" > $pkg_path/src/$rc_package/$rc_node.py
+echo -e "$rc_node_py" > $pkg_path/src/$rc_package/$rc_node_logic.py
 
 rc_node_node_py="$(cat $templates_path/rc_node_node.py)"
 rc_node_node_py=${rc_node_node_py//"?rc_package"/$rc_package}
 rc_node_node_py=${rc_node_node_py//"?RCNode"/$RCNode}
+rc_node_node_py=${rc_node_node_py//"?rc_node_logic"/$rc_node_logic}
 rc_node_node_py=${rc_node_node_py//"?rc_node"/$rc_node}
 rc_node_node_py=${rc_node_node_py//"?RC_NODE"/$RC_NODE}
 rc_node_node_py=${rc_node_node_py//"?authorName"/$authorName}
@@ -188,6 +221,7 @@ chmod +x $pkg_path/src/$rc_package/$rc_node"_node.py"
 changelog="$(cat $templates_path/CHANGELOG.rst)"
 changelog=${changelog//"?rc_package"/$rc_package}
 changelog=${changelog//"?RCNode"/$RCNode}
+changelog=${changelog//"?rc_node_logic"/$rc_node_logic}
 changelog=${changelog//"?rc_node"/$rc_node}
 changelog=${changelog//"?RC_NODE"/$RC_NODE}
 changelog=${changelog//"?authorName"/$authorName}
@@ -199,6 +233,7 @@ echo -e "$changelog" > $pkg_path/CHANGELOG.rst
 cmakelists="$(cat $templates_path/CMakeLists_py.txt)"
 cmakelists=${cmakelists//"?rc_package"/$rc_package}
 cmakelists=${cmakelists//"?RCNode"/$RCNode}
+cmakelists=${cmakelists//"?rc_node_logic"/$rc_node_logic}
 cmakelists=${cmakelists//"?rc_node"/$rc_node}
 cmakelists=${cmakelists//"?RC_NODE"/$RC_NODE}
 cmakelists=${cmakelists//"?authorName"/$authorName}
@@ -210,6 +245,7 @@ echo -e "$cmakelists" > $pkg_path/CMakeLists.txt
 pkg_xml="$(cat $templates_path/package_py.xml)"
 pkg_xml=${pkg_xml//"?rc_package"/$rc_package}
 pkg_xml=${pkg_xml//"?RCNode"/$RCNode}
+pkg_xml=${pkg_xml//"?rc_node_logic"/$rc_node_logic}
 pkg_xml=${pkg_xml//"?rc_node"/$rc_node}
 pkg_xml=${pkg_xml//"?RC_NODE"/$RC_NODE}
 pkg_xml=${pkg_xml//"?authorName"/$authorName}
@@ -221,6 +257,7 @@ echo -e "$pkg_xml" > $pkg_path/package.xml
 readme="$(cat $templates_path/README.md)"
 readme=${readme//"?rc_package"/$rc_package}
 readme=${readme//"?RCNode"/$RCNode}
+readme=${readme//"?rc_node_logic"/$rc_node_logic}
 readme=${readme//"?rc_node"/$rc_node}
 readme=${readme//"?RC_NODE"/$RC_NODE}
 readme=${readme//"?authorName"/$authorName}
@@ -230,7 +267,4 @@ echo -e "$readme" > $pkg_path/README.md
 
 # Gitignore file
 cp $templates_path/.gitignore $pkg_path/.gitignore
-
-# GitHub issue templates
-cp $templates_path/standard-bug-report.yml $pkg_path/.github/ISSUE_TEMPLATE/standard-bug-report.yml
-cp $templates_path/standard-feature-template.yml $pkg_path/.github/ISSUE_TEMPLATE/standard-feature-template.yml
+echo -e "\n${reset}The package $rc_package was created successfully..."
