@@ -23,7 +23,7 @@
 #ifndef __RCOMPONENT_H
 #define __RCOMPONENT_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pthread.h>
 #include <string>
 #include <vector>
@@ -31,10 +31,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <robotnik_msgs/State.h>
+#include "robotnik_msgs/msg/state.hpp"
 
-#include <rcomponent/rcomponent_log_macros.h>
-#include <rcomponent/topic_health_monitor.h>
+#include <rcomponent/rcomponent_log_macros.hpp>
+// #include <rcomponent/topic_health_monitor.hpp>
 #include <sstream>
 
 //! Size of string for logging
@@ -78,7 +78,7 @@ typedef struct thread_data
 } thread_data;
 
 //! Class Rcomponent
-class RComponent
+class RComponent : public rclcpp::Node
 {
 protected:
   //! Controls if it has been properly constructed, either by calling
@@ -96,41 +96,35 @@ protected:
   //!	Saves the name of the component
   string component_name;
   //! ROS node handle
-  ros::NodeHandle nh_;
+  // rclcpp::Node nh_;
+  // ros::NodeHandle nh_;
   //! Private ROS node handle
-  ros::NodeHandle pnh_;
+  // ros::NodeHandle pnh_;
   //! Desired loop frequency
+  rclcpp::Parameter freq_param_;
   double desired_freq_, real_freq;
 
   //! Publish the component state
-  ros::Publisher state_publisher;
+  rclcpp::Publisher<robotnik_msgs::msg::State>::SharedPtr state_publisher;
 
   //! Contains data for the main thread
   thread_data threadData;
 
   //! Contains all the data health monitors
-  std::map<std::string, TopicHealthMonitor> data_health_monitors_;
+  // std::map<std::string, TopicHealthMonitor> data_health_monitors_;
 
   //! Saves the time of a state transition
-  ros::Time t_state_transition_;
+  rclcpp::Time t_state_transition_;
 
 public:
   //! Public constructor
-  RComponent();
+  RComponent(const std::string& node_name);
   //! Public constructor
-  RComponent(ros::NodeHandle h);
-  //! Public constructor, assigning a private namespace
-  RComponent(ros::NodeHandle h, std::string name);
-  //! Public constructor, assigning a private nodehandle
-  RComponent(ros::NodeHandle h, ros::NodeHandle ph);
+  // RComponent(rclcpp::Node h);
   //! Public destructor
   virtual ~RComponent();
   //! Acts as a delegate constructor
-  virtual int init(ros::NodeHandle h);
-  //! Acts as a delegate constructor, assigning a private namespace
-  virtual int init(ros::NodeHandle h, std::string name);
-  //! Acts as a delegate constructor, assigning a private nodehandle
-  virtual int init(ros::NodeHandle h, ros::NodeHandle ph);
+  virtual int init();
 
   //! Starts the control loop of the component and its subcomponents
   //! @return OK
@@ -174,16 +168,16 @@ public:
   //! Returns the private namespace of the component
   const std::string getPrivateNamespace();
   //! Returns true if the topics healht is
-  virtual bool checkTopicsHealth(std::string topic_id = "");
-  //! Adds a topic health for the subscriber
-  virtual int addTopicsHealth(ros::Subscriber* subscriber = 0, std::string topic_id = "", double timeout = 5.0,
-                              bool required = true);
-  //! Ticks the selected topic
-  virtual int tickTopicsHealth(std::string topic_id);
+  // virtual bool checkTopicsHealth(std::string topic_id = "");
+  // //! Adds a topic health for the subscriber
+  // virtual int addTopicsHealth(rclcpp::Subscription* subscriber = 0, std::string topic_id = "", double timeout = 5.0,
+  //                             bool required = true);
+  // //! Ticks the selected topic
+  // virtual int tickTopicsHealth(std::string topic_id);
   //! Returns the elapsed time since the last state transition
-  ros::Duration getElapsedTimeSinceLastStateTransition();
+  rclcpp::Duration getElapsedTimeSinceLastStateTransition();
   //! Returns the state transition time
-  ros::Time getStateTransitionTime();
+  rclcpp::Time getStateTransitionTime();
 
 protected:
   //! Configures and initializes the component
@@ -244,50 +238,50 @@ protected:
 
   //! Reads a parameter from the param server, and shows a message if parameter is not set
   template <typename T>
-  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, const T& default_value,
+  bool readParam(const rclcpp::Node::SharedPtr& h, const std::string& name, T& value, const T& default_value,
                  bool required = false)
   {
     // parameter is read from node handle passed
     // required defines logger lever: if true, will show an error. if false, a warning
     // TODO: improve: return true or false depending on parameter existence and required
     // TODO: maybe would be better to define a log level instead of required
-    if (h.hasParam(name) == false)
+    if (!h->has_parameter(name))
     {
       if (required == false)
       {
-        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name) << "\", using default value: " << default_value
+        RCOMPONENT_WARN_STREAM(h->get_logger(), "No parameter \"" << name << "\", using default value: " << default_value
                                                  << ".");
       }
       else
       {
-        RCOMPONENT_ERROR_STREAM("No parameter \"" << h.resolveName(name) << "\", using default value: " << default_value
+        RCOMPONENT_ERROR_STREAM(h->get_logger(), "No parameter \"" << name << "\", using default value: " << default_value
                                                   << ".");
       }
       value = default_value;
       return false;
     }
-    h.param<T>(name, value, default_value);
+    h->get_parameter(name, value, default_value);
     return true;
   }
 
   // Double template type, used when type of default value does not match type or variable, but can be casted safely.
   // Example: T is double, S is in, or T is std::string, S is "char *"
   template <typename T, typename S>
-  bool readParam(const ros::NodeHandle& h, const std::string& name, T& value, const S& default_value,
+  bool readParam(const rclcpp::Node::SharedPtr& h, const std::string& name, T& value, const S& default_value,
                  bool required = false)
   {
     return readParam(h, name, value, static_cast<T>(default_value), required);
   }
 
   template <typename T>
-  bool readParam(const ros::NodeHandle& h, const std::string& name, std::vector<T>& value,
+  bool readParam(const rclcpp::Node::SharedPtr& h, const std::string& name, std::vector<T>& value,
                  const std::vector<T>& default_value, bool required = false)
   {
     // parameter is read from node handle passed
     // required defines logger lever: if true, will show an error. if false, a warning
     // TODO: improve: return true or false depending on parameter existence and required
     // TODO: maybe would be better to define a log level instead of required
-    if (h.hasParam(name) == false)
+    if (!h->has_parameter(name))
     {
       std::stringstream default_value_message;
       default_value_message << "[";
@@ -297,18 +291,16 @@ protected:
 
       if (required == false)
       {
-        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name)
-                                                 << "\", using default value: " << default_value_message.str() << ".");
+        RCOMPONENT_WARN_STREAM(h->get_logger(), "No parameter \"" << name << "\", using default value: " << default_value_message.str() << ".");
       }
       else
       {
-        RCOMPONENT_WARN_STREAM("No parameter \"" << h.resolveName(name)
-                                                 << "\", using default value: " << default_value_message.str() << ".");
+        RCOMPONENT_WARN_STREAM(h->get_logger(), "No parameter \"" << name << "\", using default value: " << default_value_message.str() << ".");
       }
       value = default_value;
       return false;
     }
-    h.param<std::vector<T>>(name, value, default_value);
+    h->get_parameter(name, value, default_value);
     return true;
   }
 };
