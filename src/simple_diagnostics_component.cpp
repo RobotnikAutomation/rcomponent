@@ -86,6 +86,7 @@ protected:
       diagnostic_->add(*freq_diag_);
       diagnostic_->add(*command_freq_);
     }
+    return 0;
   }
 
   // Inherits from RComponent
@@ -96,6 +97,7 @@ protected:
       RCOMPONENT_INFO("");
       service_server_.shutdown();
     }
+    return 0;
   }
 
   // Callback handler for the service server

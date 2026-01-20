@@ -56,6 +56,7 @@ private:
       // topic, queue, callback
       sub_ = nh_.subscribe(subs_topic_name_, 10, &SimpleComponent::callback, this);
     }
+    return 0;
   }
   // Inherits from RComponent
   int rosShutdown()
@@ -64,6 +65,7 @@ private:
     {
       RCOMPONENT_INFO("");
     }
+    return 0;
   }
 
   //
