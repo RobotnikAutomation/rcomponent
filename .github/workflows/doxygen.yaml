@@ -4,7 +4,6 @@ on:
   push:
     branches:
       ros2-devel
-
   workflow_dispatch:
 
 permissions:
