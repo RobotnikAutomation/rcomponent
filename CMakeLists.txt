@@ -13,6 +13,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(robotnik_common_msgs REQUIRED)
 
 if(BUILD_TESTING)
 
@@ -21,6 +23,12 @@ endif()
 # Create library
 add_library(rcomponent
   src/rcomponent.cpp
+	src/state/state_manager.cpp
+	src/state/state_interfaces.cpp
+	src/state/lifecycle/lifecycle_manager.cpp
+	src/state/lifecycle/lifecycle_transitions.cpp
+	src/state/operation/operation_manager.cpp
+	src/state/communication/communication_monitor.cpp
 )
 
 target_include_directories(rcomponent
@@ -32,6 +40,9 @@ target_include_directories(rcomponent
 ament_target_dependencies(rcomponent
   rclcpp
   rclcpp_lifecycle
+	std_msgs
+	std_srvs
+	robotnik_common_msgs
 )
 
 # Install library
@@ -54,6 +65,8 @@ ament_export_dependencies(
   rclcpp
   rclcpp_lifecycle
   std_msgs
+	std_srvs
+	robotnik_common_msgs
 )
 
 ament_export_include_directories(include) 
