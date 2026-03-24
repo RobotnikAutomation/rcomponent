@@ -17,14 +17,6 @@ namespace rcomponent
 			STOP = 2
 	};
 
-	enum OperationState : uint8_t {
-			OPERATION_STATE_UNKNOWN = 0,
-			OPERATION_STATE_INIT = 1,
-			OPERATION_STATE_STANDBY = 2,
-			OPERATION_STATE_READY = 3,
-			OPERATION_STATE_SHUTDOWN = 4
-	};
-
 	enum CommunicationState : uint8_t {
 			COMMUNICATION_STATE_UNKNOWN = 0,
 			COMMUNICATION_STATE_HEALTHY = 1,

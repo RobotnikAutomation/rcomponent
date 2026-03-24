@@ -53,17 +53,20 @@ namespace rcomponent
 
 	uint8_t StateInterfaces::update()
 	{
-		return operation_command_;
+		uint8_t command_to_process = operation_command_;
+
+		// Clear command after consuming
+		operation_command_ = OperationCommand::NONE;
+
+		return command_to_process;
 	}
 
 	void StateInterfaces::publish(const State& lifecycle_state, 
-			const State& operation_state, const State& communication_state)
+			const State& communication_state)
 	{
 		auto msg = NodeState();
 		msg.stamp = node_->get_clock()->now();
 		
-		msg.operation.id = operation_state.id;
-		msg.operation.label = operation_state.label;
 		msg.communication.id = communication_state.id;
 		msg.communication.label = communication_state.label;
 		msg.lifecycle.id = lifecycle_state.id;

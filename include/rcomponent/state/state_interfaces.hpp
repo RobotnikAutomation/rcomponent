@@ -10,7 +10,6 @@
 
 #include "rcomponent/types.hpp"
 #include "rcomponent/state/lifecycle/lifecycle_manager.hpp"
-#include "rcomponent/state/operation/operation_manager.hpp"
 #include "rcomponent/state/communication/communication_monitor.hpp"
 #include "robotnik_common_msgs/msg/node_state.hpp"
 
@@ -32,7 +31,7 @@ namespace rcomponent
 			~StateInterfaces()=default;
 
 			uint8_t update();
-			void publish(const State& lifecycle_state, const State& operation_state, const State& communication_state);
+			void publish(const State& lifecycle_state, const State& communication_state);
 
 		private:
 

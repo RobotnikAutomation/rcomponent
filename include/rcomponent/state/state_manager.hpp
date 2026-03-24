@@ -10,7 +10,6 @@
 
 #include "rcomponent/types.hpp"
 #include "rcomponent/state/lifecycle/lifecycle_manager.hpp"
-#include "rcomponent/state/operation/operation_manager.hpp"
 #include "rcomponent/state/communication/communication_monitor.hpp"
 #include "rcomponent/state/state_interfaces.hpp"
 #include "robotnik_common_msgs/msg/node_state.hpp"
@@ -45,11 +44,8 @@ namespace rcomponent
 			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
 			
 			std::shared_ptr<LifecycleManager> lifecycle_manager_;
-			std::shared_ptr<OperationManager> operation_manager_;
 			std::shared_ptr<CommunicationMonitor> communication_monitor_;
 			std::shared_ptr<StateInterfaces> state_interfaces_;
-
-			uint8_t operation_command_{OperationCommand::NONE};
 
 			void management_loop(std::stop_token st);
 

@@ -27,7 +27,6 @@ add_library(rcomponent
 	src/state/state_interfaces.cpp
 	src/state/lifecycle/lifecycle_manager.cpp
 	src/state/lifecycle/lifecycle_transitions.cpp
-	src/state/operation/operation_manager.cpp
 	src/state/communication/communication_monitor.cpp
 )
 
