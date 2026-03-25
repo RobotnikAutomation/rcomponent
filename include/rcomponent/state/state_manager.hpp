@@ -47,6 +47,8 @@ namespace rcomponent
 			std::shared_ptr<CommunicationMonitor> communication_monitor_;
 			std::shared_ptr<StateInterfaces> state_interfaces_;
 
+			bool autostart_{false};
+
 			void management_loop(std::stop_token st);
 
 	};

@@ -53,6 +53,7 @@ namespace rcomponent
 
 	uint8_t StateInterfaces::update()
 	{
+		
 		uint8_t command_to_process = operation_command_;
 
 		// Clear command after consuming

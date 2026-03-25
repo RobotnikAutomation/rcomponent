@@ -3,19 +3,14 @@
 namespace rcomponent
 {
 
-// mover make a utils
-
 Rcomponent::Rcomponent(const std::string& node_name)
 	:	rclcpp_lifecycle::LifecycleNode(node_name),
 	logger_(rclcpp::get_logger(node_name))
 {
 
-	double frequency = 1.0; // TODO(robert): read from parameters
-
-	timer_ = this->create_wall_timer(
-			std::chrono::milliseconds(static_cast<int>(1000.0 / frequency)),
-			[this]() { control_loop(); }
-	);
+	// Declare parameters
+	// autostart param is declared in StateManager class
+	declare_parameter<double>("frequency", 1.0);
 
 	RCOMPONENT_INFO("Lifecycle RComponent created");
 }
@@ -36,13 +31,23 @@ void Rcomponent::control_loop()
 
 CallbackReturn Rcomponent::on_configure(const rclcpp_lifecycle::State &)
 {
+
 	// Read parameters
+	frequency_ = this->get_parameter("frequency").as_double();
+
+	timer_ = this->create_wall_timer(
+			std::chrono::milliseconds(static_cast<int>(1000.0 / frequency_)),
+			[this]() { control_loop(); }
+	);
+
 	RCOMPONENT_INFO("On configure");
 	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_activate(const rclcpp_lifecycle::State &)
 {
+	timer_->reset();
+
 	// Run node
 	RCOMPONENT_INFO("On activate");
 	return CallbackReturn::SUCCESS;
@@ -50,6 +55,8 @@ CallbackReturn Rcomponent::on_activate(const rclcpp_lifecycle::State &)
 
 CallbackReturn Rcomponent::on_deactivate(const rclcpp_lifecycle::State &)
 {
+	timer_->cancel();
+
 	// Pause node
 	RCOMPONENT_INFO("On deactivate");
 	return CallbackReturn::SUCCESS;
