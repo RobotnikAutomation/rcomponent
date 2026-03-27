@@ -84,7 +84,8 @@ namespace rcomponent
 
 			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Handling %s command.", 
 				lifecycle_transitions_->operational_command_label(operation_command).c_str());
-
+			
+			// TODO(robert): Add node is already started/stopped messages
 			switch (operation_command)
 			{
 				case START:

@@ -3,6 +3,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
+#include "rcomponent/publisher.hpp"
+#include "rcomponent/subscriptor.hpp"
 #include "rcomponent/utils/factory.hpp"
 #include "rcomponent/utils/log_macros.hpp"
 #include "rcomponent/state/state_manager.hpp"
@@ -24,7 +26,15 @@
 //  - La maquina de estados es lifecycle, los estados operacionales del nodo son reactivos
 
 // Añadir healthcheck
+// Comunicar con StateManager para que sepa que el subscriptor está activo o no
+// Revisar multithread por defecto OK
+// Gestionar returns de los on_configure... OK
+// Revisar pub/sub para planitlla OK
+// Probar y cerrar todo
+
 // Llamar a funcion on_configure -> configure a rcomponent, devoolver lo mismo
+
+// Añadir colores a los logs por terminal
 
 namespace rcomponent
 {
@@ -44,30 +54,57 @@ class Rcomponent : public rclcpp_lifecycle::LifecycleNode
 
 		rclcpp::Logger logger_;
 
-	  // Lifecycle callbacks
-		CallbackReturn on_configure(const rclcpp_lifecycle::State &);
+	protected:
 
-		CallbackReturn on_activate(const rclcpp_lifecycle::State &);
+		template<typename MsgT>
+		std::shared_ptr<ManagedPublisher<MsgT>> create_rc_publisher(
+			const std::string& topic
+		)
+		{
+				auto pub = std::make_shared<ManagedPublisher<MsgT>>(this, topic);
+				pub->topic_name = topic;
+				registered_rc_publishers_.push_back(pub);
+				return pub;
+		}
 
-		CallbackReturn on_deactivate(const rclcpp_lifecycle::State &);
+		template<typename MsgT>
+		std::shared_ptr<ManagedSubscriptor<MsgT>> create_rc_subscription(
+			const std::string& topic,
+			std::function<void(typename MsgT::SharedPtr)> user_callback
+		)
+		{
+				auto sub = std::make_shared<ManagedSubscriptor<MsgT>>(this, topic, user_callback);
+				sub->topic_name = topic;
+				registered_rc_subscriptors_.push_back(sub);
+				return sub;
+		}
 
-		CallbackReturn on_cleanup(const rclcpp_lifecycle::State &);
+		virtual CallbackReturn rc_configure() = 0;
+    virtual CallbackReturn rc_activate() = 0;
+		virtual CallbackReturn rc_dectivate() = 0;
+		virtual CallbackReturn rc_cleanup() = 0;
+		virtual CallbackReturn rc_shutdown() = 0;
+		virtual CallbackReturn rc_error() = 0;
 
-		CallbackReturn on_shutdown(const rclcpp_lifecycle::State &);
-
-		CallbackReturn on_error(const rclcpp_lifecycle::State &);
-
-
-		// Control loop
-		virtual void control_loop();
-
-		rclcpp::TimerBase::SharedPtr timer_;
+		virtual void rc_loop() = 0;
 
 	private:
 
+		double loop_frequency_{1.0};
+
+		rclcpp::TimerBase::SharedPtr timer_;
 		std::shared_ptr<StateManager> rmanager_;
 
-		double frequency_{1.0};
-};
+	  // Lifecycle callbacks
+		CallbackReturn on_configure(const rclcpp_lifecycle::State &);
+		CallbackReturn on_activate(const rclcpp_lifecycle::State &);
+		CallbackReturn on_deactivate(const rclcpp_lifecycle::State &);
+		CallbackReturn on_cleanup(const rclcpp_lifecycle::State &);
+		CallbackReturn on_shutdown(const rclcpp_lifecycle::State &);
+		CallbackReturn on_error(const rclcpp_lifecycle::State &);
+		
+		std::vector<std::shared_ptr<ManagedPublisherInterface>> registered_rc_publishers_;
+		std::vector<std::shared_ptr<ManagedSubscriptorInterface>> registered_rc_subscriptors_;
 
+};
 }

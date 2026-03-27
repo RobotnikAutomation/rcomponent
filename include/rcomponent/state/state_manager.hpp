@@ -9,6 +9,8 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 
 #include "rcomponent/types.hpp"
+#include "rcomponent/publisher.hpp"
+#include "rcomponent/subscriptor.hpp"
 #include "rcomponent/state/lifecycle/lifecycle_manager.hpp"
 #include "rcomponent/state/communication/communication_monitor.hpp"
 #include "rcomponent/state/state_interfaces.hpp"
@@ -29,7 +31,11 @@ namespace rcomponent
 	{
 		public:
 
-			StateManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger);
+			StateManager(
+				rclcpp_lifecycle::LifecycleNode::SharedPtr node,
+				std::vector<std::shared_ptr<ManagedPublisherInterface>>& pubs,
+				std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs,
+				rclcpp::Logger logger);
 			~StateManager()=default;
 
 		private:

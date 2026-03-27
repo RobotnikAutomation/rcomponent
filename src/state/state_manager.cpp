@@ -2,13 +2,17 @@
 
 namespace rcomponent
 {
-	StateManager::StateManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger) 
-	: node_(node), 
-	logger_(logger)
+	StateManager::StateManager(
+		rclcpp_lifecycle::LifecycleNode::SharedPtr node,
+		std::vector<std::shared_ptr<ManagedPublisherInterface>>& pubs,
+		std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs,
+		rclcpp::Logger logger) 
+	: node_(node),
+		logger_(logger)
 	{
 		
-		node_->declare_parameter<bool>("autostart", 1.0);
-		autostart_ = node_->get_parameter("autostart").as_bool();
+		node_->declare_parameter<bool>("rc_autostart", false);
+		autostart_ = node_->get_parameter("rc_autostart").as_bool();
 
 		if (autostart_)
 		{
@@ -17,7 +21,7 @@ namespace rcomponent
 
 		state_interfaces_ = std::make_shared<StateInterfaces>(node_, logger_);
 		lifecycle_manager_ = std::make_shared<LifecycleManager>(node_, logger_);
-		communication_monitor_ = std::make_shared<CommunicationMonitor>(node_, logger_);
+		communication_monitor_ = std::make_shared<CommunicationMonitor>(node_, pubs, subs, logger_);
 
 		manager_thread_ = std::jthread(
 				[this](std::stop_token st){ 
