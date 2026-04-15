@@ -1,14 +1,15 @@
 #pragma once
 
+#include <rclcpp/subscription_base.hpp>
+
 class ManagedSubscriptorInterface
 {
 	public:
-		std::string topic_name;
 		virtual void activate() = 0;
 		virtual void deactivate() = 0;
 		virtual void clear() = 0;
 		virtual bool healthcheck(double timeout_sec = 1.0) const = 0;
-
+		virtual rclcpp::SubscriptionBase::SharedPtr get() = 0;
 };
 
 template<typename MessageT>
@@ -18,6 +19,8 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 
 		using SharedPtr = std::shared_ptr<ManagedSubscriptor<MessageT>>; 
 
+		// This class is meant to be created in rc_configure, so this constructor
+		// creates the interfaces
 		ManagedSubscriptor(rclcpp_lifecycle::LifecycleNode* node,
 											const std::string & topic_name,
 											std::function<void(typename MessageT::SharedPtr)> user_callback
@@ -33,25 +36,32 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 			last_msg_time_ = node_->now();
 		}
 
-		void activate()
+		void activate() override
 		{
 			process_user_callback_ = true;
 		}
 
-		void deactivate()
+		void deactivate() override
 		{
 			process_user_callback_ = false;
 		}
 
-		void clear() {
+		void clear() override 
+		{
 			sub_.reset();
 		}
 
-		bool healthcheck(double timeout_sec = 1.0) const {
+		bool healthcheck(double timeout_sec = 1.0) const override
+		{
         if (!sub_ || !node_) return false;
         auto now = node_->now();
         return (now - last_msg_time_).seconds() < timeout_sec;
     }
+
+		rclcpp::SubscriptionBase::SharedPtr get() override
+		{
+    	return sub_;
+		}
 	
 	private:
 
