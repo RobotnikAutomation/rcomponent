@@ -71,4 +71,7 @@ ament_export_dependencies(
 ament_export_include_directories(include) 
 ament_export_libraries(rcomponent)
 
+find_package(ament_cmake_python REQUIRED)
+ament_python_install_package(rcomponent)
+
 ament_package()
