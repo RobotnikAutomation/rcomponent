@@ -2,9 +2,10 @@
 
 namespace rcomponent
 {
-	StateInterfaces::StateInterfaces(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger) 
+	StateInterfaces::StateInterfaces(rclcpp_lifecycle::LifecycleNode::SharedPtr node) 
 	: node_(node), 
-	logger_(logger)
+	logger_(node->get_logger()),
+	clock_(node->get_clock())
 	{
 
 		state_manager_pub_ = node_->create_publisher<NodeState>(

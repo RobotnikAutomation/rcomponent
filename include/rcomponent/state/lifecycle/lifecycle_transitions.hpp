@@ -25,7 +25,7 @@ namespace rcomponent
 	{
 		public:
 
-			LifecycleTransitions(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger);
+			LifecycleTransitions(rclcpp_lifecycle::LifecycleNode::SharedPtr node);
 			~LifecycleTransitions()=default;
 
 			std::string transition_label(uint8_t id);
@@ -44,6 +44,7 @@ namespace rcomponent
 
 			rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
 			rclcpp::Logger logger_;
+			rclcpp::Clock::SharedPtr clock_;
 
 	};
 

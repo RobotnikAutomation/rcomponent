@@ -25,7 +25,7 @@ namespace rcomponent
 		public:
 
 
-			LifecycleManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger);
+			LifecycleManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node);
 			
 			~LifecycleManager()=default;
 
@@ -35,6 +35,7 @@ namespace rcomponent
 
 			rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
 			rclcpp::Logger logger_;
+			rclcpp::Clock::SharedPtr clock_;
 
 			bool handle_start(uint8_t current_state_id, uint8_t rcommand);
 			bool handle_stop(uint8_t current_state_id, uint8_t rcommand);

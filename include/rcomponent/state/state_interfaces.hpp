@@ -27,7 +27,7 @@ namespace rcomponent
 	{
 		public:
 
-			StateInterfaces(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger);
+			StateInterfaces(rclcpp_lifecycle::LifecycleNode::SharedPtr node);
 			~StateInterfaces()=default;
 
 			uint8_t update();
@@ -37,6 +37,7 @@ namespace rcomponent
 
 			rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
 			rclcpp::Logger logger_;
+			rclcpp::Clock::SharedPtr clock_;
 
 			rclcpp::Publisher<NodeState>::SharedPtr state_manager_pub_;
 			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_service_;

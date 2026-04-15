@@ -5,24 +5,26 @@ namespace rcomponent
 	CommunicationMonitor::CommunicationMonitor(
 		rclcpp_lifecycle::LifecycleNode::SharedPtr node, 
 		std::vector<std::shared_ptr<ManagedPublisherInterface>>& pubs,
-		std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs,
-		rclcpp::Logger logger) 
+		std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs) 
 	: node_(node),
+		logger_(node->get_logger()),
+		clock_(node->get_clock()),
 		pubs_(pubs),
-		subs_(subs),
-		logger_(logger)
+		subs_(subs)
 	{
 		RCOMPONENT_INFO("Communication created");
+
+		communication_state_ = CommunicationState::COMMUNICATION_STATE_HEALTHY;
 	}
 
 	std::string CommunicationMonitor::communication_state_label(uint8_t id){
 
 		switch (id)
 		{
-		case CommunicationState::COMMUNICATION_STATE_UNKNOWN: return "UNKNOWN";
-		case CommunicationState::COMMUNICATION_STATE_HEALTHY:  return "HEALTHY";
-		case CommunicationState::COMMUNICATION_STATE_UNHEALTHY: return "UNHEALTHY";
-		case CommunicationState::COMMUNICATION_STATE_ERROR: return "ERROR";
+		case CommunicationState::COMMUNICATION_STATE_UNKNOWN: return "unknown";
+		case CommunicationState::COMMUNICATION_STATE_HEALTHY:  return "healthy";
+		case CommunicationState::COMMUNICATION_STATE_UNHEALTHY: return "unhealthy";
+		case CommunicationState::COMMUNICATION_STATE_ERROR: return "error";
 		default: return "unknown";
 		}
 
@@ -30,18 +32,29 @@ namespace rcomponent
 
 	State CommunicationMonitor::update()
 	{
-		// healthu para pubs puede ser comprobar que hay algo al otro lado esuchando
-		// pubs_ y subs_ empaquetar en una clase. Dentro poner el nombre del topic
-		// Evaluar si añadir mensaje en el campo del state para indicar el nombre del topic 
-
-		uint8_t communication_state_ = CommunicationState::COMMUNICATION_STATE_HEALTHY;
+		// Añadir heatlcheck el publisher que compruebe que hay algo al otro lado esuchando
+		// Añadir parametro required que haga o no parar el nodo
+		// attemps, healtcheck timeout, y required deben ser parametros configurables
+		// Añadir mensaje en el campo del state para indicar el nombre del topic 
+		// Mover de subscriptor/publisher para usarse en communicator monitor para dentro de la clase healtcheck
+		// Revisar estructura para integracion clara entre monitor y lifecycle manager.
 
 		for (auto& sub : subs_)
 		{
 			if (!sub->healthcheck())
 			{
-				RCLCPP_WARN_THROTTLE(logger_, *(node_->get_clock()), 2000, "Communication unhealthy on topic: %s", sub->topic_name.c_str());
-				communication_state_ = CommunicationState::COMMUNICATION_STATE_UNHEALTHY;
+				attempt++;
+				RCOMPONENT_WARN_THROTTLE(2000, "Topic not received. Attempt (%d/100): %s", attempt, sub->get()->get_topic_name());
+				if (attempt >= 100)
+				{	
+					communication_state_ = CommunicationState::COMMUNICATION_STATE_UNHEALTHY;
+					RCOMPONENT_WARN("Communication state unhealthy: No messages received in topic '%s' for 100 attempts.", sub->get()->get_topic_name());
+				}
+			}
+			else
+			{
+				communication_state_ = CommunicationState::COMMUNICATION_STATE_HEALTHY;
+				attempt = 0;
 			}
 		}
 

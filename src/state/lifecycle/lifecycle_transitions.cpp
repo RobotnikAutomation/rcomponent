@@ -2,9 +2,10 @@
 
 namespace rcomponent
 {
-	LifecycleTransitions::LifecycleTransitions(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger) 
+	LifecycleTransitions::LifecycleTransitions(rclcpp_lifecycle::LifecycleNode::SharedPtr node) 
 	: node_(node),
-	logger_(logger)
+	logger_(node->get_logger()),
+	clock_(node->get_clock())
 	{
 		// to do
 	};

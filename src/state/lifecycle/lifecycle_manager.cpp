@@ -2,19 +2,18 @@
 
 namespace rcomponent
 {
-	LifecycleManager::LifecycleManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node, rclcpp::Logger logger) 
+	LifecycleManager::LifecycleManager(rclcpp_lifecycle::LifecycleNode::SharedPtr node) 
 	: node_(node),
-	logger_(logger)
+	logger_(node->get_logger()),
+	clock_(node->get_clock())
 	{
-		
-		lifecycle_transitions_ = std::make_shared<LifecycleTransitions>(node_, logger_);
+		lifecycle_transitions_ = std::make_shared<LifecycleTransitions>(node_);
 
 		RCOMPONENT_INFO("Lifecycle created");
-
 	}
 
-	bool LifecycleManager::handle_start(uint8_t current_state_id, uint8_t rcommand){
-
+	bool LifecycleManager::handle_start(uint8_t current_state_id, uint8_t rcommand)
+	{
 		bool success;
 
 		switch (current_state_id)
@@ -41,8 +40,8 @@ namespace rcomponent
 	}
 
 
-	bool LifecycleManager::handle_stop(uint8_t current_state_id, uint8_t rcommand){
-
+	bool LifecycleManager::handle_stop(uint8_t current_state_id, uint8_t rcommand)
+	{
 		bool success;
 
 		switch (current_state_id)
@@ -71,9 +70,6 @@ namespace rcomponent
 
 	State LifecycleManager::update(uint8_t operation_command)
 	{
-		
-		//rclcpp_lifecycle::State current_state = node_->get_current_state();
-
 		State current_state(
 			node_->get_current_state().id(),
 			node_->get_current_state().label()
@@ -81,7 +77,6 @@ namespace rcomponent
 
 		if (operation_command != OperationCommand::NONE)
 		{
-
 			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Handling %s command.", 
 				lifecycle_transitions_->operational_command_label(operation_command).c_str());
 			

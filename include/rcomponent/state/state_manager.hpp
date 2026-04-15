@@ -34,8 +34,7 @@ namespace rcomponent
 			StateManager(
 				rclcpp_lifecycle::LifecycleNode::SharedPtr node,
 				std::vector<std::shared_ptr<ManagedPublisherInterface>>& pubs,
-				std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs,
-				rclcpp::Logger logger);
+				std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs);
 			~StateManager()=default;
 
 		private:
@@ -44,6 +43,8 @@ namespace rcomponent
 
 			rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
 			rclcpp::Logger logger_;
+			rclcpp::Clock::SharedPtr clock_;
+			
 			rclcpp::Publisher<NodeState>::SharedPtr state_manager_pub_;
 			
 			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_service_;

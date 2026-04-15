@@ -5,7 +5,8 @@ namespace rcomponent
 
 Rcomponent::Rcomponent(const std::string& node_name)
 	:	rclcpp_lifecycle::LifecycleNode(node_name),
-	logger_(rclcpp::get_logger(node_name))
+	logger_(this->get_logger()),
+	clock_(this->get_clock())
 {
 
 	// Declare parameters
@@ -22,41 +23,58 @@ void Rcomponent::init()
 	rmanager_ = std::make_shared<StateManager>(
 		this->shared_from_this(), 
 		registered_rc_publishers_, 
-		registered_rc_subscriptors_, 
-		logger_);
+		registered_rc_subscriptors_);
 }
 
 CallbackReturn Rcomponent::on_configure(const rclcpp_lifecycle::State &)
 {
 	RCOMPONENT_INFO("On configure");
 
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
-	
+	auto ret = rc_configure();
+	if (ret != CallbackReturn::SUCCESS)
+	{
+		RCLCPP_ERROR(get_logger(), "rc_configure() operation failed");
+		return ret;
+	}
+
 	// Read parameters
-	loop_frequency_ = this->get_parameter("rc_loop_frequency").as_double();
+	if (!this->get_parameter("rc_loop_frequency", loop_frequency_))
+	{
+		RCLCPP_ERROR(get_logger(), "Parameter 'rc_loop_frequency' not set");
+		return CallbackReturn::FAILURE;
+	}
+
+	if (loop_frequency_ <= 0.0)
+	{
+		RCLCPP_ERROR(get_logger(), "Invalid loop frequency: %.2f", loop_frequency_);
+		return CallbackReturn::FAILURE;
+	}
 
 	timer_ = this->create_wall_timer(
 			std::chrono::milliseconds(static_cast<int>(1000.0 / loop_frequency_)),
 			[this]() { rc_loop(); }
 	);
 
-	if (callback_return == CallbackReturn::SUCCESS)
-	{
-		rc_configure();
-	}
-
-	return callback_return;
+	return  CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_activate(const rclcpp_lifecycle::State &)
 {
 
 	RCOMPONENT_INFO("On activate");
-	timer_->reset();
 
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
+	auto ret = rc_activate();
+	if (ret != CallbackReturn::SUCCESS)
+	{
+		RCLCPP_ERROR(get_logger(), "rc_activate() operation failed");
+		return ret;
+	}
+
+	if (!timer_)
+	{
+		RCLCPP_ERROR(get_logger(), "Timer not initialized");
+		return CallbackReturn::FAILURE;
+	}
 
 	for (auto& rc_publisher: registered_rc_publishers_)
 	{
@@ -68,21 +86,30 @@ CallbackReturn Rcomponent::on_activate(const rclcpp_lifecycle::State &)
 		rc_subscriptor->activate();
 	}
 
-	if (callback_return == CallbackReturn::SUCCESS)
-	{
-		callback_return = rc_activate();
-	}
+	timer_->reset();
 
-	return callback_return;
+	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_deactivate(const rclcpp_lifecycle::State &)
 {
 	RCOMPONENT_INFO("On deactivate");
-	timer_->cancel();
+	
+	auto ret = rc_deactivate();
+	if (ret != CallbackReturn::SUCCESS)
+	{
+		RCLCPP_ERROR(get_logger(), "rc_deactivate() operation failed");
+		return ret;
+	}
 
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
+	if (timer_)
+	{
+		timer_->cancel();
+	}
+	else
+	{
+		RCLCPP_WARN(get_logger(), "Timer was not initialized (nullptr), skipping cancel");
+	}
 
 	for (auto& rc_publisher: registered_rc_publishers_)
 	{
@@ -94,26 +121,24 @@ CallbackReturn Rcomponent::on_deactivate(const rclcpp_lifecycle::State &)
 		rc_subscriptor->deactivate();
 	}
 
-	if (callback_return == CallbackReturn::SUCCESS)
-	{
-		rc_dectivate();
-	}
-
-	return callback_return;
+	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_cleanup(const rclcpp_lifecycle::State &)
 {
 	RCOMPONENT_INFO("On cleanup");
-	
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
 
+	auto ret = rc_cleanup();
+	if (ret != CallbackReturn::SUCCESS)
+	{
+		RCLCPP_ERROR(get_logger(), "rc_cleanup() operation failed");
+		return ret;
+	}
+	
 	for (auto& rc_publisher: registered_rc_publishers_)
 	{
 		rc_publisher->clear();
 	}
-
 	registered_rc_publishers_.clear();
 
 	for (auto& rc_subscriptor: registered_rc_subscriptors_)
@@ -122,42 +147,35 @@ CallbackReturn Rcomponent::on_cleanup(const rclcpp_lifecycle::State &)
 	}
 	registered_rc_subscriptors_.clear();
 
-	if (callback_return == CallbackReturn::SUCCESS)
-	{
-		callback_return = rc_cleanup();
-	}
-
-	return callback_return;
+	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_shutdown(const rclcpp_lifecycle::State &)
 {
 	RCOMPONENT_INFO("On shutdown");
 
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
-
-	if (callback_return == CallbackReturn::SUCCESS)
+	auto ret = rc_shutdown();
+	if (ret != CallbackReturn::SUCCESS)
 	{
-		callback_return = rc_shutdown();
+		RCLCPP_ERROR(get_logger(), "rc_shutdown() operation failed");
+		return ret;
 	}
 
-	return callback_return;
+	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_error(const rclcpp_lifecycle::State &)
 {
 	RCOMPONENT_INFO("On Error");
 
-	// TODO(robert): Manage return code
-	CallbackReturn callback_return = CallbackReturn::SUCCESS;
-
-	if (callback_return == CallbackReturn::SUCCESS)
+	auto ret = rc_error();
+	if (ret != CallbackReturn::SUCCESS)
 	{
-		callback_return = rc_error();
+		RCLCPP_ERROR(get_logger(), "rc_error() operation failed");
+		return ret;
 	}
-
-	return callback_return;
+	
+	return CallbackReturn::SUCCESS;
 }
 
 }
