@@ -7,7 +7,6 @@ namespace rcomponent
 	logger_(node->get_logger()),
 	clock_(node->get_clock())
 	{
-		// to do
 	};
 
 std::string LifecycleTransitions::transition_label(uint8_t id)
@@ -33,18 +32,6 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 		}
 	}
 
-	std::string LifecycleTransitions::operational_command_label(uint8_t id)
-	{
-		switch(id)
-		{
-				case OperationCommand::NONE: return "none";
-				case OperationCommand::START:  return "start";
-				case OperationCommand::STOP: return "stop";
-				default: return "unknown";
-		}
-	}
-
-
 	std::string LifecycleTransitions::transition_target(uint8_t id)
 	{
 		switch(id)
@@ -57,7 +44,7 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 		}
 	}
 
-	bool LifecycleTransitions::set_transition(uint8_t desired_transition, uint8_t operational_command){
+	bool LifecycleTransitions::set_transition(uint8_t desired_transition){
 
 		CallbackReturn cb_ret;
 
@@ -69,9 +56,8 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 		{
 
 			RCOMPONENT_ERROR(
-					"rcomponent::lifecycle_manager: Cannot %s node from current state '%s'. Transition '%s' failed. "
-					"Callback on_%s() returned %s.",
-					operational_command_label(operational_command).c_str(),
+					"rcomponent::lifecycle_manager: Cannot switch node from '%s' to'%s'. "
+					"Reason: on_%s() callback returned %s.",
 					current_state.label().c_str(),
 					transition_label(desired_transition).c_str(),
 					transition_label(desired_transition).c_str(),
@@ -95,9 +81,10 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 			}
 
 			RCOMPONENT_ERROR(
-					"rcomponent::lifecycle_manager: Transition '%s' is not available for state '%s'. Available transitions: %s",
-					transition_label(desired_transition).c_str(),
+					"rcomponent::lifecycle_manager: Cannot switch node from '%s' to'%s'. "
+					"Reason: invalid transition, available transitions are: %s",
 					current_state.label().c_str(),
+					transition_label(desired_transition).c_str(),
 					available_transitions.c_str()
 			);
 
@@ -116,15 +103,24 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 		return true;
 	}
 
-
-	bool LifecycleTransitions::unconfigured_to_active(uint8_t operational_command){
-
-		if (!set_transition(LifecycleTransition::TRANSITION_CONFIGURE, operational_command))
+	bool LifecycleTransitions::unconfigured_to_inactive()
+	{
+		if (!set_transition(LifecycleTransition::TRANSITION_CONFIGURE))
 		{
 			return false;
 		}
 
-		if (!set_transition(LifecycleTransition::TRANSITION_ACTIVATE, operational_command))
+		return true;
+	}
+
+	bool LifecycleTransitions::unconfigured_to_active()
+	{
+		if (!set_transition(LifecycleTransition::TRANSITION_CONFIGURE))
+		{
+			return false;
+		}
+
+		if (!set_transition(LifecycleTransition::TRANSITION_ACTIVATE))
 		{
 			return false;
 		}
@@ -133,10 +129,25 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 	}
 
 
-	bool LifecycleTransitions::inactive_to_active(uint8_t operational_command)
+	bool LifecycleTransitions::inactive_to_active()
+	{
+		if (!set_transition(LifecycleTransition::TRANSITION_ACTIVATE))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool LifecycleTransitions::active_to_unconfigured()
 	{
 
-		if (!set_transition(LifecycleTransition::TRANSITION_ACTIVATE, operational_command))
+		if (!set_transition(LifecycleTransition::TRANSITION_DEACTIVATE))
+		{
+			return false;
+		}
+
+		if (!set_transition(LifecycleTransition::TRANSITION_CLEANUP))
 		{
 			return false;
 		}
@@ -144,31 +155,26 @@ std::string LifecycleTransitions::transition_label(uint8_t id)
 		return true;
 	}
 
-	bool LifecycleTransitions::active_to_unconfigured(uint8_t operational_command)
+	bool LifecycleTransitions::active_to_inactive()
+	{
+	
+		if (!set_transition(LifecycleTransition::TRANSITION_DEACTIVATE))
+		{
+			return false;
+		}
+	
+		return true;
+	}
+
+	bool LifecycleTransitions::inactive_to_unconfigured()
 	{
 
-		if (!set_transition(LifecycleTransition::TRANSITION_DEACTIVATE, operational_command))
-		{
-			return false;
-		}
-
-		if (!set_transition(LifecycleTransition::TRANSITION_CLEANUP, operational_command))
+		if (!set_transition(LifecycleTransition::TRANSITION_CLEANUP))
 		{
 			return false;
 		}
 
 		return true;
 	}
-
-	bool LifecycleTransitions::inactive_to_unconfigured(uint8_t operational_command)
-	{
-
-		if (!set_transition(LifecycleTransition::TRANSITION_CLEANUP, operational_command))
-		{
-			return false;
-		}
-
-		return true;
-	}
-
+	
 }

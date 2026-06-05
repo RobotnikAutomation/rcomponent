@@ -14,7 +14,8 @@ namespace rcomponent
 	enum OperationCommand : uint8_t {
 			NONE = 0,
 			START = 1,
-			STOP = 2
+			STOP = 2,
+			PAUSE = 3
 	};
 
 	enum CommunicationState : uint8_t {

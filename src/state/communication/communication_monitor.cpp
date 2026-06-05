@@ -5,7 +5,8 @@ namespace rcomponent
 	CommunicationMonitor::CommunicationMonitor(
 		rclcpp_lifecycle::LifecycleNode::SharedPtr node, 
 		std::vector<std::shared_ptr<ManagedPublisherInterface>>& pubs,
-		std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs) 
+		std::vector<std::shared_ptr<ManagedSubscriptorInterface>>& subs,
+		double timeout)
 	: node_(node),
 		logger_(node->get_logger()),
 		clock_(node->get_clock()),
@@ -14,7 +15,11 @@ namespace rcomponent
 	{
 		RCOMPONENT_INFO("Communication created");
 
-		communication_state_ = CommunicationState::COMMUNICATION_STATE_HEALTHY;
+		healthcheck_ = std::make_shared<HealthCheck>(node_, pubs, subs, timeout);
+
+		communication_state_ = CommunicationState::COMMUNICATION_STATE_UNKNOWN;
+
+		last_health_check_time_ = node_->now();
 	}
 
 	std::string CommunicationMonitor::communication_state_label(uint8_t id){
@@ -30,40 +35,28 @@ namespace rcomponent
 
 	}
 
-	State CommunicationMonitor::update()
+	State CommunicationMonitor::get_state()
 	{
-		// Añadir heatlcheck el publisher que compruebe que hay algo al otro lado esuchando
-		// Añadir parametro required que haga o no parar el nodo
-		// attemps, healtcheck timeout, y required deben ser parametros configurables
-		// Añadir mensaje en el campo del state para indicar el nombre del topic 
-		// Mover de subscriptor/publisher para usarse en communicator monitor para dentro de la clase healtcheck
-		// Revisar estructura para integracion clara entre monitor y lifecycle manager.
-
-		for (auto& sub : subs_)
+		if (node_->get_current_state().id() == LifecycleState::PRIMARY_STATE_UNCONFIGURED)
 		{
-			if (!sub->healthcheck())
+			communication_state_ = CommunicationState::COMMUNICATION_STATE_UNKNOWN;
+		}
+		else if (node_->get_current_state().id() == LifecycleState::PRIMARY_STATE_ACTIVE)
+		{
+			if (!healthcheck_->subscribers_health() || !healthcheck_->publishers_health())
 			{
-				attempt++;
-				RCOMPONENT_WARN_THROTTLE(2000, "Topic not received. Attempt (%d/100): %s", attempt, sub->get()->get_topic_name());
-				if (attempt >= 100)
-				{	
-					communication_state_ = CommunicationState::COMMUNICATION_STATE_UNHEALTHY;
-					RCOMPONENT_WARN("Communication state unhealthy: No messages received in topic '%s' for 100 attempts.", sub->get()->get_topic_name());
-				}
+				communication_state_ = CommunicationState::COMMUNICATION_STATE_UNHEALTHY;
+				RCOMPONENT_WARN_THROTTLE(4000,"Communication is state unhealthy");
 			}
 			else
 			{
 				communication_state_ = CommunicationState::COMMUNICATION_STATE_HEALTHY;
-				attempt = 0;
 			}
 		}
-
+		
 		return State(
 			communication_state_,
 			communication_state_label(communication_state_)
 		);
 	}
-
-
 };
-		

@@ -12,18 +12,25 @@ namespace rcomponent
 		RCOMPONENT_INFO("Lifecycle created");
 	}
 
-	bool LifecycleManager::handle_start(uint8_t current_state_id, uint8_t rcommand)
+	bool LifecycleManager::start_node()
 	{
 		bool success;
 
-		switch (current_state_id)
+		RCOMPONENT_INFO("rcomponent::lifecycle_manager: Starting node...");
+
+		switch (node_->get_current_state().id())
 		{
 		case LifecycleState::PRIMARY_STATE_UNCONFIGURED:
-			success = lifecycle_transitions_->unconfigured_to_active(rcommand);
+			success = lifecycle_transitions_->unconfigured_to_active();
 			break;
 		
 		case LifecycleState::PRIMARY_STATE_INACTIVE:
-			success = lifecycle_transitions_->inactive_to_active(rcommand);
+			success = lifecycle_transitions_->inactive_to_active();
+			break;
+
+		case LifecycleState::PRIMARY_STATE_ACTIVE:
+			RCOMPONENT_WARN("rcomponent::lifecycle_manager: Node is already started");
+			success = true;
 			break;
 
 		default:
@@ -36,28 +43,44 @@ namespace rcomponent
 			break;
 		}
 
+		if (success)
+		{
+			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Node successfully started!");
+		}
+		else
+		{
+			RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Failed to start node.");
+		}
+
 		return success;
 	}
 
 
-	bool LifecycleManager::handle_stop(uint8_t current_state_id, uint8_t rcommand)
+	bool LifecycleManager::stop_node()
 	{
 		bool success;
 
-		switch (current_state_id)
+		RCOMPONENT_INFO("rcomponent::lifecycle_manager: Stopping node...");
+
+		switch (node_->get_current_state().id())
 		{
 		case LifecycleState::PRIMARY_STATE_ACTIVE:
-			success = lifecycle_transitions_->active_to_unconfigured(rcommand);
+			success = lifecycle_transitions_->active_to_unconfigured();
 			break;
 		
 		case LifecycleState::PRIMARY_STATE_INACTIVE:
-			success = lifecycle_transitions_->inactive_to_unconfigured(rcommand);
+			success = lifecycle_transitions_->inactive_to_unconfigured();
+			break;
+
+		case LifecycleState::PRIMARY_STATE_UNCONFIGURED:
+			RCOMPONENT_WARN("rcomponent::lifecycle_manager: Node is already stopped");
+			success = true;
 			break;
 
 		default:
 			RCOMPONENT_ERROR(
 					"rcomponent::lifecycle_manager: Cannot stop node from current state '%s'. Expected: '%s' or '%s'.",
-					lifecycle_transitions_->state_label(current_state_id).c_str(),
+					lifecycle_transitions_->state_label(node_->get_current_state().id()).c_str(),
 					lifecycle_transitions_->state_label(LifecycleState::PRIMARY_STATE_ACTIVE).c_str(),
 					lifecycle_transitions_->state_label(LifecycleState::PRIMARY_STATE_INACTIVE).c_str()
 			);
@@ -65,58 +88,68 @@ namespace rcomponent
 			break;
 		}
 
+		if (success)
+		{
+			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Node successfully stopped!");
+		}
+		else
+		{
+			RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Failed to stop node.");
+		}
+
 		return success;
 	}
 
-	State LifecycleManager::update(uint8_t operation_command)
+	bool LifecycleManager::pause_node()
 	{
-		State current_state(
-			node_->get_current_state().id(),
-			node_->get_current_state().label()
-		);
+		bool success;
 
-		if (operation_command != OperationCommand::NONE)
+		RCOMPONENT_INFO("rcomponent::lifecycle_manager: Pausing node...");
+
+		switch (node_->get_current_state().id())
 		{
-			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Handling %s command.", 
-				lifecycle_transitions_->operational_command_label(operation_command).c_str());
-			
-			// TODO(robert): Add node is already started/stopped messages
-			switch (operation_command)
-			{
-				case START:
+		case LifecycleState::PRIMARY_STATE_UNCONFIGURED:
+			success = lifecycle_transitions_->unconfigured_to_inactive();
+			break;
+		
+		case LifecycleState::PRIMARY_STATE_ACTIVE:
+			success = lifecycle_transitions_->active_to_inactive();
+			break;
 
-					if (handle_start(current_state.id, operation_command))
-					{
-        		RCOMPONENT_INFO("rcomponent::lifecycle_manager: Node successfully started!");
-					}
-					else
-					{
-						RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Failed to start node.");
-					}
-					break;
+		case LifecycleState::PRIMARY_STATE_INACTIVE:
+			RCOMPONENT_WARN("rcomponent::lifecycle_manager: Node is already paused");
+			success = true;
+			break;
 
-				case STOP:
-
-					if (handle_stop(current_state.id, operation_command))
-					{
-        		RCOMPONENT_INFO("rcomponent::lifecycle_manager: Node successfully stopped!");
-					}
-					else
-					{
-						RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Failed to stop node.");
-					}
-					break;
-
-				default:
-
-					RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Unknown rcomponent command: '%d'", operation_command);
-					break;
-			}
-
+		default:
+			RCOMPONENT_ERROR(
+					"rcomponent::lifecycle_manager: Cannot pause node from current state '%s'. Expected: '%s' or '%s'.",
+					lifecycle_transitions_->state_label(node_->get_current_state().id()).c_str(),
+					lifecycle_transitions_->state_label(LifecycleState::PRIMARY_STATE_ACTIVE).c_str(),
+					lifecycle_transitions_->state_label(LifecycleState::PRIMARY_STATE_UNCONFIGURED).c_str()
+			);
+			success = false;
+			break;
 		}
 
-		return current_state;
+		if (success)
+		{
+			RCOMPONENT_INFO("rcomponent::lifecycle_manager: Node successfully paused!");
+		}
+		else
+		{
+			RCOMPONENT_ERROR("rcomponent::lifecycle_manager: Failed to pause node.");
+		}
+
+		return success;
 	}
 
+	State LifecycleManager::get_state()
+	{
+		return State(
+				node_->get_current_state().id(),
+				node_->get_current_state().label()
+			);
+	}
 
 }

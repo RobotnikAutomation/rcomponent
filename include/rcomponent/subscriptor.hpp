@@ -8,7 +8,7 @@ class ManagedSubscriptorInterface
 		virtual void activate() = 0;
 		virtual void deactivate() = 0;
 		virtual void clear() = 0;
-		virtual bool healthcheck(double timeout_sec = 1.0) const = 0;
+		virtual double time_since_last_activity() = 0;
 		virtual rclcpp::SubscriptionBase::SharedPtr get() = 0;
 };
 
@@ -23,21 +23,23 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 		// creates the interfaces
 		ManagedSubscriptor(rclcpp_lifecycle::LifecycleNode* node,
 											const std::string & topic_name,
-											std::function<void(typename MessageT::SharedPtr)> user_callback
+											std::function<void(typename MessageT::SharedPtr)> user_callback,
+											bool required
 											)
 			: node_(node),
 				topic_name_(topic_name),
-				user_callback_(user_callback)
+				user_callback_(user_callback),
+				required_(required)
 		{
 			sub_ = node_->create_subscription<MessageT>(topic_name_, 10, [this](typename MessageT::SharedPtr msg) {
 				managed_callback(msg);
 			});
 
-			last_msg_time_ = node_->now();
 		}
 
 		void activate() override
 		{
+			last_msg_time_ = node_->now();
 			process_user_callback_ = true;
 		}
 
@@ -51,12 +53,13 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 			sub_.reset();
 		}
 
-		bool healthcheck(double timeout_sec = 1.0) const override
+		double time_since_last_activity() override
 		{
-        if (!sub_ || !node_) return false;
-        auto now = node_->now();
-        return (now - last_msg_time_).seconds() < timeout_sec;
-    }
+			if(required_)
+				return (node_->now() - last_msg_time_).seconds();
+			
+			return 0;
+		}
 
 		rclcpp::SubscriptionBase::SharedPtr get() override
 		{
@@ -68,6 +71,7 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 		rclcpp_lifecycle::LifecycleNode* node_;
 		std::string topic_name_;
 		typename rclcpp::Subscription<MessageT>::SharedPtr sub_;
+		bool required_;
 		std::function<void(typename MessageT::SharedPtr)> user_callback_;
 		bool process_user_callback_ = false;
 		rclcpp::Time last_msg_time_;

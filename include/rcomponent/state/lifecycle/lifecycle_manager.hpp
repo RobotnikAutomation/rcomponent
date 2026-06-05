@@ -29,17 +29,17 @@ namespace rcomponent
 			
 			~LifecycleManager()=default;
 
-			State update(uint8_t operation_command);
+			bool start_node();
+			bool stop_node();
+			bool pause_node();
+			State get_state();
 
 		private:
 
 			rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
 			rclcpp::Logger logger_;
 			rclcpp::Clock::SharedPtr clock_;
-
-			bool handle_start(uint8_t current_state_id, uint8_t rcommand);
-			bool handle_stop(uint8_t current_state_id, uint8_t rcommand);
-
+			
 			std::shared_ptr<LifecycleTransitions> lifecycle_transitions_;
 	};
 

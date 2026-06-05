@@ -30,15 +30,16 @@ namespace rcomponent
 
 			std::string transition_label(uint8_t id);
 			std::string state_label(uint8_t id);
-			std::string operational_command_label(uint8_t id);
 			std::string transition_target(uint8_t id);
 
-			bool set_transition(uint8_t desired_transition, uint8_t operational_command);
+			bool set_transition(uint8_t desired_transition);
 
-			bool unconfigured_to_active(uint8_t operational_command);
-			bool inactive_to_active(uint8_t operational_command);
-			bool active_to_unconfigured(uint8_t operational_command);
-			bool inactive_to_unconfigured(uint8_t operational_command);
+			bool unconfigured_to_inactive();
+			bool unconfigured_to_active();
+			bool inactive_to_active();
+			bool active_to_unconfigured();
+			bool active_to_inactive();
+			bool inactive_to_unconfigured();
 
 		private:
 

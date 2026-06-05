@@ -18,14 +18,12 @@
 
 namespace rcomponent
 {	
-
 	using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 	using TriggerRequest = std::shared_ptr<std_srvs::srv::Trigger::Request>;
 	using TriggerResponse = std::shared_ptr<std_srvs::srv::Trigger::Response>;
 	using LifecycleState = lifecycle_msgs::msg::State;
 	using LifecycleTransition = lifecycle_msgs::msg::Transition;
 	using NodeState = robotnik_common_msgs::msg::NodeState;
-
 
 	class StateManager
 	{
@@ -54,7 +52,8 @@ namespace rcomponent
 			std::shared_ptr<CommunicationMonitor> communication_monitor_;
 			std::shared_ptr<StateInterfaces> state_interfaces_;
 
-			bool autostart_{false};
+			bool autostart_;
+			double activity_timeout_;
 
 			void management_loop(std::stop_token st);
 

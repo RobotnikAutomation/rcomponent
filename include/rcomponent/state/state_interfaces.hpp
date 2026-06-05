@@ -30,7 +30,7 @@ namespace rcomponent
 			StateInterfaces(rclcpp_lifecycle::LifecycleNode::SharedPtr node);
 			~StateInterfaces()=default;
 
-			uint8_t update();
+			uint8_t get_command();
 			void publish(const State& lifecycle_state, const State& communication_state);
 
 		private:
@@ -41,11 +41,13 @@ namespace rcomponent
 
 			rclcpp::Publisher<NodeState>::SharedPtr state_manager_pub_;
 			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_service_;
+			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_service_;
 			rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
 			
 			uint8_t operation_command_{OperationCommand::NONE};
 
 			void start_callback([[maybe_unused]] TriggerRequest request, TriggerResponse response);
+			void pause_callback([[maybe_unused]] TriggerRequest request, TriggerResponse response);
 			void stop_callback([[maybe_unused]] TriggerRequest request, TriggerResponse response);
 		
 	};

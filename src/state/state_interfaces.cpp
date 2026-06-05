@@ -7,7 +7,6 @@ namespace rcomponent
 	logger_(node->get_logger()),
 	clock_(node->get_clock())
 	{
-
 		state_manager_pub_ = node_->create_publisher<NodeState>(
 			node_->get_name() + std::string("/state"), 10);
 
@@ -17,6 +16,15 @@ namespace rcomponent
     		TriggerRequest request, TriggerResponse response)
 				{
 					start_callback(request, response);
+				}
+		);
+
+		pause_service_ = node_->create_service<std_srvs::srv::Trigger>(
+			node_->get_name() + std::string("/pause"),
+			[this](
+    		TriggerRequest request, TriggerResponse response)
+				{
+					pause_callback(request, response);
 				}
 		);
 
@@ -38,7 +46,17 @@ namespace rcomponent
 		operation_command_ = OperationCommand::START;
 
 		response->success = true;
-		response->message = " Start request received.";
+		response->message = "Start request received.";
+
+	}
+
+	void StateInterfaces::pause_callback([[maybe_unused]] TriggerRequest request, TriggerResponse response){
+
+		RCOMPONENT_INFO("rcomponent::state_interfaces: Pause request received.");
+		operation_command_ = OperationCommand::PAUSE;
+
+		response->success = true;
+		response->message = " Pause request received.";
 
 	}
 
@@ -52,7 +70,7 @@ namespace rcomponent
 
 	}
 
-	uint8_t StateInterfaces::update()
+	uint8_t StateInterfaces::get_command()
 	{
 		
 		uint8_t command_to_process = operation_command_;

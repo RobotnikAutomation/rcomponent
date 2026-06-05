@@ -12,8 +12,11 @@ namespace rcomponent
 	{
 		
 		node_->declare_parameter<bool>("rc_autostart", false);
+		node_->declare_parameter<double>("rc_activity_timeout", 10);
+		
 		autostart_ = node_->get_parameter("rc_autostart").as_bool();
-
+		activity_timeout_ = node_->get_parameter("rc_activity_timeout").as_double();
+		
 		if (autostart_)
 		{
 			RCOMPONENT_INFO("Autostart active, configuring and activating node...");
@@ -21,7 +24,7 @@ namespace rcomponent
 
 		state_interfaces_ = std::make_shared<StateInterfaces>(node_);
 		lifecycle_manager_ = std::make_shared<LifecycleManager>(node_);
-		communication_monitor_ = std::make_shared<CommunicationMonitor>(node_, pubs, subs);
+		communication_monitor_ = std::make_shared<CommunicationMonitor>(node_, pubs, subs, activity_timeout_);
 
 		manager_thread_ = std::jthread(
 				[this](std::stop_token st){ 
@@ -32,45 +35,63 @@ namespace rcomponent
 	}
 
 	void StateManager::management_loop(std::stop_token st)
-	{		
+	{
 			State lifecycle_state;
-			State communication_monitor;
-			uint8_t operation_command;
+			State communication_state;
+			uint8_t user_command;
 			rclcpp::Time last_time = node_->get_clock()->now();
 
 			while (!st.stop_requested())
 			{
+				
+				// System management
+
+				communication_state = communication_monitor_->get_state();
+				lifecycle_state = lifecycle_manager_->get_state();
 
 				if (autostart_)
 				{
-					operation_command = OperationCommand::START;
+					RCOMPONENT_WARN("Requesting node start (autostart)");
+					lifecycle_manager_->start_node();
 					autostart_ = false;
 				}
-				else
+
+				if (lifecycle_state.id == LifecycleState::PRIMARY_STATE_ACTIVE)
 				{
-					operation_command = state_interfaces_->update();
-				}
-
-				communication_monitor = communication_monitor_->update();
-
-				lifecycle_state = lifecycle_manager_->update(operation_command);
-
-				if (communication_monitor.id == CommunicationState::COMMUNICATION_STATE_UNHEALTHY)
-				{
-					if (lifecycle_state.id == LifecycleState::PRIMARY_STATE_ACTIVE)
+					if (communication_state.id == CommunicationState::COMMUNICATION_STATE_UNHEALTHY)
 					{
-						// Mandar a deactivate. Evaliar si implementar PAUSE. Desde ahi se puede
-						// hacer que el nodo se autorecupere porque el callback sigue funcionando en ese estado
-						operation_command = OperationCommand::STOP;
-						lifecycle_state = lifecycle_manager_->update(operation_command);
+						RCOMPONENT_WARN("Requesting node pause (communication unhealthy)");
+						lifecycle_manager_->pause_node();
 					}
 				}
 
+				// User requests
+
+				user_command = state_interfaces_->get_command();
+
+				if (user_command == OperationCommand::START)
+				{
+					RCOMPONENT_WARN("Requesting node start (user request)");
+					lifecycle_manager_->start_node();
+				}
+				else if (user_command == OperationCommand::PAUSE)
+				{
+					RCOMPONENT_WARN("Requesting node pause (user request)");
+					lifecycle_manager_->pause_node();
+				}
+				else if (user_command == OperationCommand::STOP)
+				{
+					RCOMPONENT_WARN("Requesting node stop (user request)");
+					lifecycle_manager_->stop_node();
+				}
+
+				// Publish state
+
 				state_interfaces_->publish(
 					lifecycle_state,
-					communication_monitor
+					communication_state
 				);
-
+				
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 	}

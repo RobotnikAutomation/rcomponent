@@ -28,6 +28,7 @@ add_library(rcomponent
 	src/state/lifecycle/lifecycle_manager.cpp
 	src/state/lifecycle/lifecycle_transitions.cpp
 	src/state/communication/communication_monitor.cpp
+	src/state/communication/health_check.cpp
 )
 
 target_include_directories(rcomponent

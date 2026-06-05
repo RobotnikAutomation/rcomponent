@@ -42,10 +42,12 @@ class Rcomponent : public rclcpp_lifecycle::LifecycleNode
 
 		template<typename MsgT>
 		std::shared_ptr<ManagedPublisher<MsgT>> create_rc_publisher(
-			const std::string& topic
+			const std::string& topic,
+			const rclcpp::QoS & qos = rclcpp::QoS(10),
+			bool required = false
 		)
 		{
-				auto pub = std::make_shared<ManagedPublisher<MsgT>>(this, topic);
+				auto pub = std::make_shared<ManagedPublisher<MsgT>>(this, topic, qos, required);
 				registered_rc_publishers_.push_back(pub);
 				return pub;
 		}
@@ -53,14 +55,16 @@ class Rcomponent : public rclcpp_lifecycle::LifecycleNode
 		template<typename MsgT>
 		std::shared_ptr<ManagedSubscriptor<MsgT>> create_rc_subscription(
 			const std::string& topic,
-			std::function<void(typename MsgT::SharedPtr)> user_callback
+			std::function<void(typename MsgT::SharedPtr)> user_callback,
+			bool required = false
 		)
 		{
-				auto sub = std::make_shared<ManagedSubscriptor<MsgT>>(this, topic, user_callback);
+				auto sub = std::make_shared<ManagedSubscriptor<MsgT>>(this, topic, user_callback, required);
 				registered_rc_subscriptors_.push_back(sub);
 				return sub;
 		}
 
+		// Rcomponent user implementations
 		virtual CallbackReturn rc_configure() = 0;
     virtual CallbackReturn rc_activate() = 0;
 		virtual CallbackReturn rc_deactivate() = 0;

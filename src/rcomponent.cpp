@@ -6,11 +6,11 @@ namespace rcomponent
 Rcomponent::Rcomponent(const std::string& node_name)
 	:	rclcpp_lifecycle::LifecycleNode(node_name),
 	logger_(this->get_logger()),
-	clock_(this->get_clock())
+	clock_(this->get_clock()) 
 {
 
 	// Declare parameters
-	// autostart param is declared in StateManager class
+	// autostart and healtcheck timeout params are declared in StateManager class
 	declare_parameter<double>("rc_loop_frequency", 1.0);
 
 	RCOMPONENT_INFO("Lifecycle RComponent created");
@@ -33,20 +33,20 @@ CallbackReturn Rcomponent::on_configure(const rclcpp_lifecycle::State &)
 	auto ret = rc_configure();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_configure() operation failed");
+		RCOMPONENT_ERROR("rc_configure() operation failed");
 		return ret;
 	}
 
 	// Read parameters
 	if (!this->get_parameter("rc_loop_frequency", loop_frequency_))
 	{
-		RCLCPP_ERROR(get_logger(), "Parameter 'rc_loop_frequency' not set");
+		RCOMPONENT_ERROR("Parameter 'rc_loop_frequency' not set");
 		return CallbackReturn::FAILURE;
 	}
 
 	if (loop_frequency_ <= 0.0)
 	{
-		RCLCPP_ERROR(get_logger(), "Invalid loop frequency: %.2f", loop_frequency_);
+		RCOMPONENT_ERROR("Invalid loop frequency: %.2f", loop_frequency_);
 		return CallbackReturn::FAILURE;
 	}
 
@@ -55,24 +55,25 @@ CallbackReturn Rcomponent::on_configure(const rclcpp_lifecycle::State &)
 			[this]() { rc_loop(); }
 	);
 
-	return  CallbackReturn::SUCCESS;
+	timer_->cancel();
+
+	return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn Rcomponent::on_activate(const rclcpp_lifecycle::State &)
 {
-
 	RCOMPONENT_INFO("On activate");
 
 	auto ret = rc_activate();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_activate() operation failed");
+		RCOMPONENT_ERROR("rc_activate() operation failed");
 		return ret;
 	}
 
 	if (!timer_)
 	{
-		RCLCPP_ERROR(get_logger(), "Timer not initialized");
+		RCOMPONENT_ERROR("Timer not initialized");
 		return CallbackReturn::FAILURE;
 	}
 
@@ -98,7 +99,7 @@ CallbackReturn Rcomponent::on_deactivate(const rclcpp_lifecycle::State &)
 	auto ret = rc_deactivate();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_deactivate() operation failed");
+		RCOMPONENT_ERROR("rc_deactivate() operation failed");
 		return ret;
 	}
 
@@ -131,7 +132,7 @@ CallbackReturn Rcomponent::on_cleanup(const rclcpp_lifecycle::State &)
 	auto ret = rc_cleanup();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_cleanup() operation failed");
+		RCOMPONENT_ERROR("rc_cleanup() operation failed");
 		return ret;
 	}
 	
@@ -147,6 +148,8 @@ CallbackReturn Rcomponent::on_cleanup(const rclcpp_lifecycle::State &)
 	}
 	registered_rc_subscriptors_.clear();
 
+	timer_.reset();
+
 	return CallbackReturn::SUCCESS;
 }
 
@@ -157,7 +160,7 @@ CallbackReturn Rcomponent::on_shutdown(const rclcpp_lifecycle::State &)
 	auto ret = rc_shutdown();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_shutdown() operation failed");
+		RCOMPONENT_ERROR("rc_shutdown() operation failed");
 		return ret;
 	}
 
@@ -171,7 +174,7 @@ CallbackReturn Rcomponent::on_error(const rclcpp_lifecycle::State &)
 	auto ret = rc_error();
 	if (ret != CallbackReturn::SUCCESS)
 	{
-		RCLCPP_ERROR(get_logger(), "rc_error() operation failed");
+		RCOMPONENT_ERROR("rc_error() operation failed");
 		return ret;
 	}
 	
