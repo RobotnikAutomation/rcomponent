@@ -29,7 +29,7 @@ public:
 					topic_name_(topic_name),
 					required_(required)
     {
-			pub_ = node_->create_publisher<MessageT>(topic_name_, 10);
+			pub_ = node_->create_publisher<MessageT>(topic_name_, qos);
     }
 
 		void activate() override

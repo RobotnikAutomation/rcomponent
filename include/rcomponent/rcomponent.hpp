@@ -10,12 +10,9 @@
 #include "rcomponent/state/state_manager.hpp"
 
 // Comprobar clock si use_sim es true
-
 // Añadir readme 
 // Revisar comentarios headers y dependencias
 // Añadir test minimo
-// Comunicar con StateManager para que sepa que el subscriptor está activo o no
-// Revisar communication_status: healthcheck
 // Añadir creador basico de pubs y subs
 // Añadir creador de single/multithread
 
@@ -40,6 +37,18 @@ class Rcomponent : public rclcpp_lifecycle::LifecycleNode
 
 	protected:
 
+		template<typename T>
+		T get_rc_param(const std::string & name, const T & default_value)
+		{
+				if (!this->has_parameter(name)) {
+						this->declare_parameter<T>(name, default_value);
+				}
+
+				T value;
+				this->get_parameter(name, value);
+				return value;
+		}
+
 		template<typename MsgT>
 		std::shared_ptr<ManagedPublisher<MsgT>> create_rc_publisher(
 			const std::string& topic,
@@ -56,10 +65,11 @@ class Rcomponent : public rclcpp_lifecycle::LifecycleNode
 		std::shared_ptr<ManagedSubscriptor<MsgT>> create_rc_subscription(
 			const std::string& topic,
 			std::function<void(typename MsgT::SharedPtr)> user_callback,
+			const rclcpp::QoS & qos = rclcpp::QoS(10),
 			bool required = false
 		)
 		{
-				auto sub = std::make_shared<ManagedSubscriptor<MsgT>>(this, topic, user_callback, required);
+				auto sub = std::make_shared<ManagedSubscriptor<MsgT>>(this, topic, user_callback, qos, required);
 				registered_rc_subscriptors_.push_back(sub);
 				return sub;
 		}

@@ -24,6 +24,7 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 		ManagedSubscriptor(rclcpp_lifecycle::LifecycleNode* node,
 											const std::string & topic_name,
 											std::function<void(typename MessageT::SharedPtr)> user_callback,
+											const rclcpp::QoS & qos,
 											bool required
 											)
 			: node_(node),
@@ -31,7 +32,7 @@ class ManagedSubscriptor : public ManagedSubscriptorInterface
 				user_callback_(user_callback),
 				required_(required)
 		{
-			sub_ = node_->create_subscription<MessageT>(topic_name_, 10, [this](typename MessageT::SharedPtr msg) {
+			sub_ = node_->create_subscription<MessageT>(topic_name_, qos, [this](typename MessageT::SharedPtr msg) {
 				managed_callback(msg);
 			});
 
